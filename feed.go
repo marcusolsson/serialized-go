@@ -3,7 +3,7 @@ package serialized
 // Feed holds a Serialized.io feed.
 type Feed struct {
 	Entries []FeedEntry `json:"entries"`
-	HasMore string      `json:"hasMore"`
+	HasMore bool        `json:"hasMore"`
 }
 
 // FeedEntry holds a Serialized.io feed entry.

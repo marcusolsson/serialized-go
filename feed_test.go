@@ -28,7 +28,7 @@ func TestFeed(t *testing.T) {
       ]
     }
   ],
-  "hasMore": "false"
+  "hasMore": false
 }`))
 	}))
 
