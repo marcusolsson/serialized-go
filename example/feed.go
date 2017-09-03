@@ -26,5 +26,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%+v", feed.Entries)
+	fmt.Printf("%+v\n", feed.Entries)
 }

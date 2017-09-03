@@ -1,5 +1,10 @@
 package serialized
 
+import (
+	"fmt"
+	"net/http"
+)
+
 // Feed holds a Serialized.io feed.
 type Feed struct {
 	Entries []FeedEntry `json:"entries"`
@@ -25,7 +30,11 @@ func (c *Client) Feeds() ([]string, error) {
 		Feeds []string `json:"feeds"`
 	}
 
-	_, err = c.do(req, &response)
+	resp, err := c.do(req, &response)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
 	return response.Feeds, err
 }
 
@@ -37,6 +46,10 @@ func (c *Client) Feed(name string) (Feed, error) {
 	}
 
 	var f Feed
-	_, err = c.do(req, &f)
+	resp, err := c.do(req, &f)
+	if resp.StatusCode != http.StatusOK {
+		return Feed{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
 	return f, err
 }
