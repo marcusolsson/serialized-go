@@ -36,7 +36,7 @@ func TestFeed(t *testing.T) {
 		WithBaseURL(ts.URL),
 	)
 
-	f, err := c.Feed("payment")
+	f, err := c.Feed("payment", 0)
 	if err != nil {
 		t.Fatal(err)
 	}

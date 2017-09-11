@@ -61,8 +61,10 @@ func WithSecretAccessKey(key string) func(*Client) {
 }
 
 func (c *Client) newRequest(method, path string, body interface{}) (*http.Request, error) {
-	rel := &url.URL{Path: path}
-	u := c.baseURL.ResolveReference(rel)
+	u, err := c.baseURL.Parse(path)
+	if err != nil {
+		return nil, err
+	}
 
 	var buf io.ReadWriter
 	if body != nil {
