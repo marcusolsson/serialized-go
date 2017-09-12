@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 )
 
@@ -86,5 +87,83 @@ func TestCreateReaction(t *testing.T) {
 
 	if err := c.CreateReaction(r); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestDeleteReaction(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		want := make([]byte, 0)
+
+		got, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		got = bytes.TrimSpace(got)
+
+		if !bytes.Equal(got, want) {
+			var wantIndent bytes.Buffer
+			json.Indent(&wantIndent, want, "", "\t")
+
+			var gotIndent bytes.Buffer
+			json.Indent(&gotIndent, got, "", "\t")
+
+			t.Errorf("unexpected request body =\n%s\n\nwant =\n%s", got, want)
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	c := NewClient(
+		WithBaseURL(ts.URL),
+	)
+
+	id := "be278b27-8687-42b4-a502-164a6702797c"
+
+	if err := c.DeleteReaction(id); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestGetReaction(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{
+			"id": "be278b27-8687-42b4-a502-164a6702797c",
+			"name": "PaymentProcessedEmailReaction",
+			"feed": "payment",
+			"eventType": "PaymentProcessed",
+			"action": {
+				"httpMethod": "POST",
+				"targetUri": "https://your-webhook",
+				"body": "A new payment was processed",
+				"actionType": "HTTP"
+			}
+		}`))
+	}))
+
+	c := NewClient(
+		WithBaseURL(ts.URL),
+	)
+
+	want := Reaction{
+		ID:        "be278b27-8687-42b4-a502-164a6702797c",
+		Name:      "PaymentProcessedEmailReaction",
+		Feed:      "payment",
+		EventType: "PaymentProcessed",
+		Action: Action{
+			HTTPMethod: "POST",
+			TargetURI:  "https://your-webhook",
+			Body:       "A new payment was processed",
+			ActionType: "HTTP",
+		},
+	}
+
+	got, err := c.Reaction(want.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got = %v; want = %v", got, want)
 	}
 }
