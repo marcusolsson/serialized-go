@@ -11,6 +11,7 @@ type Reaction struct {
 	Name      string `json:"name"`
 	Feed      string `json:"feed"`
 	EventType string `json:"eventType"`
+	Delay     string `json:"delay"`
 	Action    Action `json:"action"`
 }
 

@@ -18,7 +18,8 @@ func TestListReactions(t *testing.T) {
       "id": "be278b27-8687-42b4-a502-164a6702797c",
       "name": "PaymentProcessedEmailReaction",
       "feed": "payment",
-      "eventType": "PaymentProcessed",
+	  "eventType": "PaymentProcessed",
+	  "delay": "PT1H",
       "action": {
         "httpMethod": "POST",
         "targetUri": "https://your-webhook",
@@ -46,7 +47,7 @@ func TestListReactions(t *testing.T) {
 
 func TestCreateReaction(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		want := []byte(`{"id":"be278b27-8687-42b4-a502-164a6702797c","name":"PaymentProcessedEmailReaction","feed":"payment","eventType":"PaymentProcessed","action":{"httpMethod":"POST","targetUri":"https://your-webhook","body":"A new payment was processed","actionType":"HTTP"}}`)
+		want := []byte(`{"id":"be278b27-8687-42b4-a502-164a6702797c","name":"PaymentProcessedEmailReaction","feed":"payment","eventType":"PaymentProcessed","delay":"PT1H","action":{"httpMethod":"POST","targetUri":"https://your-webhook","body":"A new payment was processed","actionType":"HTTP"}}`)
 
 		got, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -77,6 +78,7 @@ func TestCreateReaction(t *testing.T) {
 		Name:      "PaymentProcessedEmailReaction",
 		Feed:      "payment",
 		EventType: "PaymentProcessed",
+		Delay:     "PT1H",
 		Action: Action{
 			HTTPMethod: "POST",
 			TargetURI:  "https://your-webhook",
@@ -132,6 +134,7 @@ func TestGetReaction(t *testing.T) {
 			"name": "PaymentProcessedEmailReaction",
 			"feed": "payment",
 			"eventType": "PaymentProcessed",
+			"delay": "PT1H",
 			"action": {
 				"httpMethod": "POST",
 				"targetUri": "https://your-webhook",
@@ -150,6 +153,7 @@ func TestGetReaction(t *testing.T) {
 		Name:      "PaymentProcessedEmailReaction",
 		Feed:      "payment",
 		EventType: "PaymentProcessed",
+		Delay:     "PT1H",
 		Action: Action{
 			HTTPMethod: "POST",
 			TargetURI:  "https://your-webhook",
