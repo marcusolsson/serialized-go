@@ -38,6 +38,21 @@ func (c *Client) Store(aggType, aggID string, version int64, events ...Event) er
 	return err
 }
 
+// Aggregate exists returns whether a specific aggregate exists.
+func (c *Client) AggregateExists(aggType, aggID string) (bool, error) {
+	req, err := c.newRequest("HEAD", "/aggregates/"+aggType+"/"+aggID, nil)
+	if err != nil {
+		return false, err
+	}
+
+	resp, err := c.do(req, nil)
+	if resp.StatusCode != http.StatusOK {
+		return false, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	return true, err
+}
+
 // LoadAggregate loads all events for a single aggregate.
 func (c *Client) LoadAggregate(aggType, aggID string) (Aggregate, error) {
 	req, err := c.newRequest("GET", "/aggregates/"+aggType+"/"+aggID, nil)

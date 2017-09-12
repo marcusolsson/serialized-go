@@ -53,6 +53,29 @@ func TestStore(t *testing.T) {
 	}
 }
 
+func TestAggregateExists(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	}))
+
+	c := NewClient(
+		WithBaseURL(ts.URL),
+	)
+
+	var (
+		aggType = "payment"
+		aggID   = "22c3780f-6dcb-440f-8532-6693be83f21c"
+	)
+
+	exists, err := c.AggregateExists(aggType, aggID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !exists {
+		t.Fatal("aggregate should exist")
+	}
+}
+
 func TestLoadAggregate(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{
