@@ -25,8 +25,44 @@ func main() {
 	var since int
 	var current bool
 
+	var cmdAggregate = &cobra.Command{
+		Use:   "aggregate [type] [id]",
+		Short: "Display an aggregate",
+		Args:  cobra.MinimumNArgs(2),
+		Run: func(cmd *cobra.Command, args []string) {
+
+			agg, err := client.LoadAggregate(args[0], args[1])
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			w := tabwriter.NewWriter(os.Stdout, 5, 4, 1, ' ', 0)
+			fmt.Fprintln(w, "TYPE:", "\t", agg.Type)
+			fmt.Fprintln(w, "ID:", "\t", agg.ID)
+			fmt.Fprintln(w, "VERSION:", "\t", agg.Version)
+			fmt.Fprintln(w)
+			fmt.Fprintln(w, "Showing the 10 most recent events:")
+			fmt.Fprintln(w)
+
+			w.Flush()
+
+			fmt.Fprintln(w, "ID:", "\t", "Type:", "\t", "Data:")
+
+			events := agg.Events
+			if len(events) > 5 {
+				events = events[:5]
+			}
+
+			for _, e := range events {
+				fmt.Fprintln(w, e.ID, "\t", e.Type, "\t", string(e.Data))
+			}
+
+			w.Flush()
+		},
+	}
+
 	var cmdFeed = &cobra.Command{
-		Use:   "feed [feed name]",
+		Use:   "feed [name]",
 		Short: "Display the feed output",
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
@@ -75,6 +111,6 @@ func main() {
 	cmdFeed.Flags().BoolVarP(&current, "current", "c", false, "Return current sequence number at head for a given feed.")
 
 	var rootCmd = &cobra.Command{Use: "serialized-cli"}
-	rootCmd.AddCommand(cmdFeed, cmdFeeds)
+	rootCmd.AddCommand(cmdAggregate, cmdFeed, cmdFeeds)
 	rootCmd.Execute()
 }
