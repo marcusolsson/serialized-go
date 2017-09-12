@@ -21,10 +21,13 @@ func main() {
 		serialized.WithSecretAccessKey(*secretAccessKey),
 	)
 
-	feed, err := client.Feed("payment")
+	feed, err := client.Feed("payment", 0)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%+v\n", feed.Entries)
+	for _, e := range feed.Entries {
+		fmt.Printf("%+v\n", e)
+	}
+
 }

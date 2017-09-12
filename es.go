@@ -21,8 +21,9 @@ func (c *Client) Store(aggType, aggID string, version int64, events ...Event) er
 		ExpectedVersion int64   `json:"expectedVersion,omitempty"`
 		Events          []Event `json:"events"`
 	}{
-		AggregateID: aggID,
-		Events:      events,
+		AggregateID:     aggID,
+		ExpectedVersion: version,
+		Events:          events,
 	}
 
 	req, err := c.newRequest("POST", "/aggregates/"+aggType+"/events", reqBody)

@@ -47,7 +47,7 @@ func TestStore(t *testing.T) {
 		Currency:      "SEK",
 	}
 
-	err := c.Store("payment", "123", 1, NewEvent("456", "PaymentProcessed", pp))
+	err := c.Store("payment", "123", 0, NewEvent("456", "PaymentProcessed", pp))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -34,7 +34,7 @@ func main() {
 		Currency:      "SEK",
 	}
 
-	err := client.Store("payment", "2c3cf88c-ee88-427e-818a-ab0267511c84", 1,
+	err := client.Store("payment", "2c3cf88c-ee88-427e-818a-ab0267511c84", 0,
 		serialized.NewEvent(uuid.NewV4().String(), "PaymentProcessed", pp))
 	if err != nil {
 		log.Fatal(err)
