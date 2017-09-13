@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"text/tabwriter"
 
-	serialized "github.com/marcusolsson/serialized-go"
 	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
+
+	serialized "github.com/marcusolsson/serialized-go"
 )
 
 func main() {
@@ -57,7 +57,8 @@ func main() {
 			}
 
 			if err := client.Store(args[0], args[1], expectedVersion, event); err != nil {
-				log.Fatal(err)
+				fmt.Println("unable to store event:", err)
+				os.Exit(1)
 			}
 		},
 	}
@@ -67,10 +68,10 @@ func main() {
 		Short: "Display an aggregate",
 		Args:  cobra.MinimumNArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-
 			agg, err := client.LoadAggregate(args[0], args[1])
 			if err != nil {
-				log.Fatal(err)
+				fmt.Println("unable to load aggregate:", err)
+				os.Exit(1)
 			}
 
 			w := tabwriter.NewWriter(os.Stdout, 5, 4, 1, ' ', 0)
@@ -89,34 +90,32 @@ func main() {
 			if len(events) > maxNumEvents {
 				events = events[len(events)-maxNumEvents:]
 			}
-
 			for _, e := range events {
 				fmt.Fprintln(w, e.ID, "\t", e.Type, "\t", string(e.Data))
 			}
-
 			w.Flush()
 		},
 	}
 
 	var cmdFeed = &cobra.Command{
 		Use:   "feed [name]",
-		Short: "Display the feed output",
+		Short: "Display the feed",
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			if current {
 				seq, err := client.FeedSequenceNumber(args[0])
 				if err != nil {
-					log.Fatal(err)
+					fmt.Println("unable to get sequence number:", err)
+					os.Exit(1)
 				}
-
 				fmt.Println(seq)
-
 				return
 			}
 
 			feed, err := client.Feed(args[0], since)
 			if err != nil {
-				log.Fatal(err)
+				fmt.Println("unable to get feed:", err)
+				os.Exit(1)
 			}
 
 			w := tabwriter.NewWriter(os.Stdout, 5, 5, 2, ' ', 0)
@@ -137,11 +136,12 @@ func main() {
 
 	var cmdFeeds = &cobra.Command{
 		Use:   "feeds",
-		Short: "List the available fields",
+		Short: "List all existing feeds",
 		Run: func(cmd *cobra.Command, args []string) {
 			feeds, err := client.Feeds()
 			if err != nil {
-				log.Fatal(err)
+				fmt.Println("unable to list feeds:", err)
+				os.Exit(1)
 			}
 			for _, f := range feeds {
 				fmt.Println(f)
