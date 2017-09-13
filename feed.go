@@ -33,11 +33,15 @@ func (c *Client) Feeds() ([]string, error) {
 	}
 
 	resp, err := c.do(req, &response)
+	if err != nil {
+		return nil, err
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	return response.Feeds, err
+	return response.Feeds, nil
 }
 
 // Feed returns the feed for a given aggregate.
@@ -59,11 +63,15 @@ func (c *Client) Feed(name string, since int64) (Feed, error) {
 
 	var f Feed
 	resp, err := c.do(req, &f)
+	if err != nil {
+		return Feed{}, err
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return Feed{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	return f, err
+	return f, nil
 }
 
 // FeedSequenceNumber returns current sequence number at head for a given feed.
@@ -74,6 +82,10 @@ func (c *Client) FeedSequenceNumber(feedName string) (int64, error) {
 	}
 
 	resp, err := c.do(req, nil)
+	if err != nil {
+		return 0, err
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return 0, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
@@ -84,5 +96,5 @@ func (c *Client) FeedSequenceNumber(feedName string) (int64, error) {
 		return 0, err
 	}
 
-	return seq, err
+	return seq, nil
 }

@@ -65,11 +65,15 @@ func (c *Client) DeleteReaction(id string) error {
 	}
 
 	resp, err := c.do(req, nil)
+	if err != nil {
+		return err
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	return err
+	return nil
 }
 
 // Reaction returns a reaction with a given ID.
@@ -80,11 +84,14 @@ func (c *Client) Reaction(id string) (Reaction, error) {
 	}
 
 	var r Reaction
-
 	resp, err := c.do(req, &r)
+	if err != nil {
+		return Reaction{}, err
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return Reaction{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	return r, err
+	return r, nil
 }
