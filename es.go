@@ -1,9 +1,13 @@
 package serialized
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 )
+
+// ErrAggregateNotFound is returned when no events exist for a given aggregate ID.
+var ErrAggregateNotFound = errors.New("aggregate not found")
 
 // Aggregate holds a Serialized.io Aggregate.
 type Aggregate struct {
@@ -55,6 +59,9 @@ func (c *Client) AggregateExists(aggType, aggID string) (bool, error) {
 		return false, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return false, ErrAggregateNotFound
+	}
 	if resp.StatusCode != http.StatusOK {
 		return false, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
