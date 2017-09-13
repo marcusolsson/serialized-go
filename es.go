@@ -7,19 +7,19 @@ import (
 
 // Aggregate holds a Serialized.io Aggregate.
 type Aggregate struct {
-	ID      string  `json:"aggregateId"`
-	Version int     `json:"aggregateVersion"`
-	Type    string  `json:"aggregateType"`
-	Events  []Event `json:"events"`
+	ID      string   `json:"aggregateId"`
+	Version int      `json:"aggregateVersion"`
+	Type    string   `json:"aggregateType"`
+	Events  []*Event `json:"events"`
 }
 
 // Store saves events for a given aggregate. All events must refer to
 // the same aggregate id.
-func (c *Client) Store(aggType, aggID string, version int64, events ...Event) error {
+func (c *Client) Store(aggType, aggID string, version int64, events ...*Event) error {
 	reqBody := struct {
-		AggregateID     string  `json:"aggregateId"`
-		Events          []Event `json:"events"`
-		ExpectedVersion int64   `json:"expectedVersion,omitempty"`
+		AggregateID     string   `json:"aggregateId"`
+		Events          []*Event `json:"events"`
+		ExpectedVersion int64    `json:"expectedVersion,omitempty"`
 	}{
 		AggregateID:     aggID,
 		ExpectedVersion: version,
@@ -63,20 +63,20 @@ func (c *Client) AggregateExists(aggType, aggID string) (bool, error) {
 }
 
 // LoadAggregate loads all events for a single aggregate.
-func (c *Client) LoadAggregate(aggType, aggID string) (Aggregate, error) {
+func (c *Client) LoadAggregate(aggType, aggID string) (*Aggregate, error) {
 	req, err := c.newRequest("GET", "/aggregates/"+aggType+"/"+aggID, nil)
 	if err != nil {
-		return Aggregate{}, err
+		return nil, err
 	}
 
-	var a Aggregate
-	resp, err := c.do(req, &a)
+	a := new(Aggregate)
+	resp, err := c.do(req, a)
 	if err != nil {
-		return Aggregate{}, err
+		return nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return Aggregate{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
 	return a, nil

@@ -9,8 +9,8 @@ import (
 
 // Feed holds a Serialized.io feed.
 type Feed struct {
-	Entries []FeedEntry `json:"entries"`
-	HasMore bool        `json:"hasMore"`
+	Entries []*FeedEntry `json:"entries"`
+	HasMore bool         `json:"hasMore"`
 }
 
 // FeedEntry holds a Serialized.io feed entry.
@@ -18,7 +18,7 @@ type FeedEntry struct {
 	SequenceNumber int64
 	AggregateID    string
 	Timestamp      int64
-	Events         []Event
+	Events         []*Event
 }
 
 // Feeds returns all feed types.
@@ -45,7 +45,7 @@ func (c *Client) Feeds() ([]string, error) {
 }
 
 // Feed returns the feed for a given aggregate.
-func (c *Client) Feed(name string, since int64) (Feed, error) {
+func (c *Client) Feed(name string, since int64) (*Feed, error) {
 	u := &url.URL{
 		Path: "/feeds/" + name,
 	}
@@ -58,17 +58,17 @@ func (c *Client) Feed(name string, since int64) (Feed, error) {
 
 	req, err := c.newRequest("GET", u.String(), nil)
 	if err != nil {
-		return Feed{}, err
+		return nil, err
 	}
 
-	var f Feed
+	f := new(Feed)
 	resp, err := c.do(req, &f)
 	if err != nil {
-		return Feed{}, err
+		return nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return Feed{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
 	return f, nil

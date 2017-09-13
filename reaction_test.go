@@ -50,7 +50,7 @@ func TestCreateReaction(t *testing.T) {
 		WithBaseURL(ts.URL),
 	)
 
-	r := Reaction{
+	r := &Reaction{
 		ID:        "be278b27-8687-42b4-a502-164a6702797c",
 		Name:      "PaymentProcessedEmailReaction",
 		Feed:      "payment",
@@ -95,7 +95,7 @@ func TestGetReaction(t *testing.T) {
 		WithBaseURL(ts.URL),
 	)
 
-	want := Reaction{
+	want := &Reaction{
 		ID:        "be278b27-8687-42b4-a502-164a6702797c",
 		Name:      "PaymentProcessedEmailReaction",
 		Feed:      "payment",

@@ -42,3 +42,11 @@ func assertEqualJSON(t *testing.T, b1, b2 []byte) {
 		t.Errorf("unexpected request body =\n%s\n\nwant =\n%s", buf1.String(), buf2.String())
 	}
 }
+
+func mustMarshal(v interface{}) []byte {
+	b, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}

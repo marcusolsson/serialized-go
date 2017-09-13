@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"log"
 	"math/rand"
@@ -28,16 +29,26 @@ func main() {
 		serialized.WithSecretAccessKey(*secretAccessKey),
 	)
 
-	pp := PaymentProcessed{
-		PaymentMethod: "CARD",
-		Amount:        rand.Intn(1000),
-		Currency:      "SEK",
+	ev := &serialized.Event{
+		ID:   uuid.NewV4().String(),
+		Type: "PaymentProcessed",
+		Data: mustMarshal(PaymentProcessed{
+			PaymentMethod: "CARD",
+			Amount:        rand.Intn(1000),
+			Currency:      "SEK",
+		}),
 	}
 
-	err := client.Store("payment", "2c3cf88c-ee88-427e-818a-ab0267511c84", 0,
-		serialized.NewEvent(uuid.NewV4().String(), "PaymentProcessed", pp),
-		serialized.NewEvent(uuid.NewV4().String(), "PaymentProcessed", pp))
+	err := client.Store("payment", "2c3cf88c-ee88-427e-818a-ab0267511c84", 0, ev)
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func mustMarshal(v interface{}) []byte {
+	b, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	return b
 }

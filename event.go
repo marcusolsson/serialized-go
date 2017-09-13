@@ -9,14 +9,3 @@ type Event struct {
 	Data          json.RawMessage `json:"data,omitempty"`
 	EncryptedData string          `json:"encryptedData,omitempty"`
 }
-
-// NewEvent is a helper function for marshaling event data to JSON.
-func NewEvent(eventID, eventType string, data interface{}, encryptedData string) Event {
-	b, _ := json.Marshal(data)
-	return Event{
-		Type:          eventType,
-		ID:            eventID,
-		Data:          b,
-		EncryptedData: encryptedData,
-	}
-}

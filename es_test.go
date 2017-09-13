@@ -36,9 +36,14 @@ func TestStore(t *testing.T) {
 		Currency:      "SEK",
 	}
 
-	err := c.Store("payment", "2c3cf88c-ee88-427e-818a-ab0267511c84", 1,
-		NewEvent("f2c8bfc1-c702-4f1a-b295-ef113ed7c8be", "PaymentProcessed", pp, "string"))
-	if err != nil {
+	ev := &Event{
+		ID:            "f2c8bfc1-c702-4f1a-b295-ef113ed7c8be",
+		Type:          "PaymentProcessed",
+		Data:          mustMarshal(pp),
+		EncryptedData: "string",
+	}
+
+	if err := c.Store("payment", "2c3cf88c-ee88-427e-818a-ab0267511c84", 1, ev); err != nil {
 		t.Fatal(err)
 	}
 }

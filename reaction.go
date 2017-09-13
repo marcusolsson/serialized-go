@@ -24,7 +24,7 @@ type Action struct {
 }
 
 // CreateReaction registers a new reaction.
-func (c *Client) CreateReaction(r Reaction) error {
+func (c *Client) CreateReaction(r *Reaction) error {
 	req, err := c.newRequest("POST", "/reactions", r)
 	if err != nil {
 		return err
@@ -39,14 +39,14 @@ func (c *Client) CreateReaction(r Reaction) error {
 }
 
 // ListReactions returns all registered reactions.
-func (c *Client) ListReactions() ([]Reaction, error) {
+func (c *Client) ListReactions() ([]*Reaction, error) {
 	req, err := c.newRequest("GET", "/reactions", nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var response struct {
-		Reactions []Reaction `json:"reactions"`
+		Reactions []*Reaction `json:"reactions"`
 	}
 
 	resp, err := c.do(req, &response)
@@ -77,20 +77,20 @@ func (c *Client) DeleteReaction(id string) error {
 }
 
 // Reaction returns a reaction with a given ID.
-func (c *Client) Reaction(id string) (Reaction, error) {
+func (c *Client) Reaction(id string) (*Reaction, error) {
 	req, err := c.newRequest("DELETE", "/reactions/"+id, nil)
 	if err != nil {
-		return Reaction{}, err
+		return nil, err
 	}
 
-	var r Reaction
+	r := new(Reaction)
 	resp, err := c.do(req, &r)
 	if err != nil {
-		return Reaction{}, err
+		return nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return Reaction{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
 	return r, nil
