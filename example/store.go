@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"log"
@@ -39,7 +40,7 @@ func main() {
 		}),
 	}
 
-	err := client.Store("payment", "2c3cf88c-ee88-427e-818a-ab0267511c84", 0, ev)
+	err := client.Store(context.Background(), "payment", "2c3cf88c-ee88-427e-818a-ab0267511c84", 0, ev)
 	if err != nil {
 		log.Fatal(err)
 	}

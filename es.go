@@ -1,6 +1,7 @@
 package serialized
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -19,7 +20,7 @@ type Aggregate struct {
 
 // Store saves events for a given aggregate. All events must refer to
 // the same aggregate id.
-func (c *Client) Store(aggType, aggID string, version int64, events ...*Event) error {
+func (c *Client) Store(ctx context.Context, aggType, aggID string, version int64, events ...*Event) error {
 	reqBody := struct {
 		AggregateID     string   `json:"aggregateId"`
 		Events          []*Event `json:"events"`
@@ -35,7 +36,7 @@ func (c *Client) Store(aggType, aggID string, version int64, events ...*Event) e
 		return err
 	}
 
-	resp, err := c.do(req, nil)
+	resp, err := c.do(ctx, req, nil)
 	if err != nil {
 		return err
 	}
@@ -48,13 +49,13 @@ func (c *Client) Store(aggType, aggID string, version int64, events ...*Event) e
 }
 
 // AggregateExists returns whether a specific aggregate exists.
-func (c *Client) AggregateExists(aggType, aggID string) (bool, error) {
+func (c *Client) AggregateExists(ctx context.Context, aggType, aggID string) (bool, error) {
 	req, err := c.newRequest("HEAD", "/aggregates/"+aggType+"/"+aggID, nil)
 	if err != nil {
 		return false, err
 	}
 
-	resp, err := c.do(req, nil)
+	resp, err := c.do(ctx, req, nil)
 	if err != nil {
 		return false, err
 	}
@@ -70,14 +71,14 @@ func (c *Client) AggregateExists(aggType, aggID string) (bool, error) {
 }
 
 // LoadAggregate loads all events for a single aggregate.
-func (c *Client) LoadAggregate(aggType, aggID string) (*Aggregate, error) {
+func (c *Client) LoadAggregate(ctx context.Context, aggType, aggID string) (*Aggregate, error) {
 	req, err := c.newRequest("GET", "/aggregates/"+aggType+"/"+aggID, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	a := new(Aggregate)
-	resp, err := c.do(req, a)
+	resp, err := c.do(ctx, req, a)
 	if err != nil {
 		return nil, err
 	}

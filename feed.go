@@ -1,6 +1,7 @@
 package serialized
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -22,7 +23,7 @@ type FeedEntry struct {
 }
 
 // Feeds returns all feed types.
-func (c *Client) Feeds() ([]string, error) {
+func (c *Client) Feeds(ctx context.Context) ([]string, error) {
 	req, err := c.newRequest("GET", "/feeds/", nil)
 	if err != nil {
 		return nil, err
@@ -32,7 +33,7 @@ func (c *Client) Feeds() ([]string, error) {
 		Feeds []string `json:"feeds"`
 	}
 
-	resp, err := c.do(req, &response)
+	resp, err := c.do(ctx, req, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +46,7 @@ func (c *Client) Feeds() ([]string, error) {
 }
 
 // Feed returns the feed for a given aggregate.
-func (c *Client) Feed(name string, since int64) (*Feed, error) {
+func (c *Client) Feed(ctx context.Context, name string, since int64) (*Feed, error) {
 	u := &url.URL{
 		Path: "/feeds/" + name,
 	}
@@ -62,7 +63,7 @@ func (c *Client) Feed(name string, since int64) (*Feed, error) {
 	}
 
 	f := new(Feed)
-	resp, err := c.do(req, &f)
+	resp, err := c.do(ctx, req, &f)
 	if err != nil {
 		return nil, err
 	}
@@ -75,13 +76,13 @@ func (c *Client) Feed(name string, since int64) (*Feed, error) {
 }
 
 // FeedSequenceNumber returns current sequence number at head for a given feed.
-func (c *Client) FeedSequenceNumber(feedName string) (int64, error) {
+func (c *Client) FeedSequenceNumber(ctx context.Context, feedName string) (int64, error) {
 	req, err := c.newRequest("HEAD", "/feeds/"+feedName, nil)
 	if err != nil {
 		return 0, err
 	}
 
-	resp, err := c.do(req, nil)
+	resp, err := c.do(ctx, req, nil)
 	if err != nil {
 		return 0, err
 	}

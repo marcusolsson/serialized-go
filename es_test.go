@@ -1,6 +1,7 @@
 package serialized
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -43,7 +44,7 @@ func TestStore(t *testing.T) {
 		EncryptedData: "string",
 	}
 
-	if err := c.Store("payment", "2c3cf88c-ee88-427e-818a-ab0267511c84", 1, ev); err != nil {
+	if err := c.Store(context.Background(), "payment", "2c3cf88c-ee88-427e-818a-ab0267511c84", 1, ev); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -61,7 +62,7 @@ func TestAggregateExists(t *testing.T) {
 		aggID   = "22c3780f-6dcb-440f-8532-6693be83f21c"
 	)
 
-	exists, err := c.AggregateExists(aggType, aggID)
+	exists, err := c.AggregateExists(context.Background(), aggType, aggID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +91,7 @@ func TestLoadAggregate(t *testing.T) {
 		aggVersion = 1
 	)
 
-	agg, err := c.LoadAggregate(aggType, aggID)
+	agg, err := c.LoadAggregate(context.Background(), aggType, aggID)
 	if err != nil {
 		t.Fatal(err)
 	}

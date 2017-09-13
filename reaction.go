@@ -1,6 +1,7 @@
 package serialized
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
@@ -24,13 +25,13 @@ type Action struct {
 }
 
 // CreateReaction registers a new reaction.
-func (c *Client) CreateReaction(r *Reaction) error {
+func (c *Client) CreateReaction(ctx context.Context, r *Reaction) error {
 	req, err := c.newRequest("POST", "/reactions", r)
 	if err != nil {
 		return err
 	}
 
-	resp, err := c.do(req, nil)
+	resp, err := c.do(ctx, req, nil)
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
@@ -39,7 +40,7 @@ func (c *Client) CreateReaction(r *Reaction) error {
 }
 
 // ListReactions returns all registered reactions.
-func (c *Client) ListReactions() ([]*Reaction, error) {
+func (c *Client) ListReactions(ctx context.Context) ([]*Reaction, error) {
 	req, err := c.newRequest("GET", "/reactions", nil)
 	if err != nil {
 		return nil, err
@@ -49,7 +50,7 @@ func (c *Client) ListReactions() ([]*Reaction, error) {
 		Reactions []*Reaction `json:"reactions"`
 	}
 
-	resp, err := c.do(req, &response)
+	resp, err := c.do(ctx, req, &response)
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
@@ -58,13 +59,13 @@ func (c *Client) ListReactions() ([]*Reaction, error) {
 }
 
 // DeleteReaction deletes a reaction with a given ID.
-func (c *Client) DeleteReaction(id string) error {
+func (c *Client) DeleteReaction(ctx context.Context, id string) error {
 	req, err := c.newRequest("DELETE", "/reactions/"+id, nil)
 	if err != nil {
 		return err
 	}
 
-	resp, err := c.do(req, nil)
+	resp, err := c.do(ctx, req, nil)
 	if err != nil {
 		return err
 	}
@@ -77,14 +78,14 @@ func (c *Client) DeleteReaction(id string) error {
 }
 
 // Reaction returns a reaction with a given ID.
-func (c *Client) Reaction(id string) (*Reaction, error) {
+func (c *Client) Reaction(ctx context.Context, id string) (*Reaction, error) {
 	req, err := c.newRequest("DELETE", "/reactions/"+id, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	r := new(Reaction)
-	resp, err := c.do(req, &r)
+	resp, err := c.do(ctx, req, &r)
 	if err != nil {
 		return nil, err
 	}

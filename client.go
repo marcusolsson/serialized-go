@@ -2,6 +2,7 @@ package serialized
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -92,9 +93,16 @@ func (c *Client) newRequest(method, path string, body interface{}) (*http.Reques
 	return req, nil
 }
 
-func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
+func (c *Client) do(ctx context.Context, req *http.Request, v interface{}) (*http.Response, error) {
+	req = req.WithContext(ctx)
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
 		return nil, err
 	}
 	defer resp.Body.Close()

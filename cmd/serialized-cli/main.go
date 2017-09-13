@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"text/tabwriter"
@@ -56,7 +57,9 @@ func main() {
 				Data: []byte(eventData),
 			}
 
-			if err := client.Store(args[0], args[1], expectedVersion, event); err != nil {
+			ctx := context.Background()
+
+			if err := client.Store(ctx, args[0], args[1], expectedVersion, event); err != nil {
 				fmt.Println("unable to store event:", err)
 				os.Exit(1)
 			}
@@ -68,7 +71,9 @@ func main() {
 		Short: "Display an aggregate",
 		Args:  cobra.MinimumNArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			agg, err := client.LoadAggregate(args[0], args[1])
+			ctx := context.Background()
+
+			agg, err := client.LoadAggregate(ctx, args[0], args[1])
 			if err != nil {
 				fmt.Println("unable to load aggregate:", err)
 				os.Exit(1)
@@ -102,8 +107,10 @@ func main() {
 		Short: "Display the feed",
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
+			ctx := context.Background()
+
 			if current {
-				seq, err := client.FeedSequenceNumber(args[0])
+				seq, err := client.FeedSequenceNumber(ctx, args[0])
 				if err != nil {
 					fmt.Println("unable to get sequence number:", err)
 					os.Exit(1)
@@ -112,7 +119,7 @@ func main() {
 				return
 			}
 
-			feed, err := client.Feed(args[0], since)
+			feed, err := client.Feed(ctx, args[0], since)
 			if err != nil {
 				fmt.Println("unable to get feed:", err)
 				os.Exit(1)
@@ -138,7 +145,9 @@ func main() {
 		Use:   "feeds",
 		Short: "List all existing feeds",
 		Run: func(cmd *cobra.Command, args []string) {
-			feeds, err := client.Feeds()
+			ctx := context.Background()
+
+			feeds, err := client.Feeds(ctx)
 			if err != nil {
 				fmt.Println("unable to list feeds:", err)
 				os.Exit(1)

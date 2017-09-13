@@ -1,6 +1,7 @@
 package serialized
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -21,7 +22,7 @@ func TestListReactions(t *testing.T) {
 		WithBaseURL(ts.URL),
 	)
 
-	r, err := c.ListReactions()
+	r, err := c.ListReactions(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +65,7 @@ func TestCreateReaction(t *testing.T) {
 		},
 	}
 
-	if err := c.CreateReaction(r); err != nil {
+	if err := c.CreateReaction(context.Background(), r); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -77,7 +78,7 @@ func TestDeleteReaction(t *testing.T) {
 		WithBaseURL(ts.URL),
 	)
 
-	if err := c.DeleteReaction("be278b27-8687-42b4-a502-164a6702797c"); err != nil {
+	if err := c.DeleteReaction(context.Background(), "be278b27-8687-42b4-a502-164a6702797c"); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -109,7 +110,7 @@ func TestGetReaction(t *testing.T) {
 		},
 	}
 
-	got, err := c.Reaction(want.ID)
+	got, err := c.Reaction(context.Background(), want.ID)
 	if err != nil {
 		t.Fatal(err)
 	}

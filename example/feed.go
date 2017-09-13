@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -21,7 +22,7 @@ func main() {
 		serialized.WithSecretAccessKey(*secretAccessKey),
 	)
 
-	feed, err := client.Feed("payment", 0)
+	feed, err := client.Feed(context.Background(), "payment", 0)
 	if err != nil {
 		log.Fatal(err)
 	}

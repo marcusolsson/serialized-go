@@ -1,6 +1,7 @@
 package serialized
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -20,7 +21,7 @@ func TestFeed(t *testing.T) {
 		WithBaseURL(ts.URL),
 	)
 
-	f, err := c.Feed("payment", 0)
+	f, err := c.Feed(context.Background(), "payment", 0)
 	if err != nil {
 		t.Fatal(err)
 	}
