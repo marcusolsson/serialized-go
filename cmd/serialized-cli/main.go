@@ -50,7 +50,7 @@ func main() {
 				os.Exit(1)
 			}
 
-			event := serialized.Event{
+			event := &serialized.Event{
 				Type: eventType,
 				ID:   eventID,
 				Data: []byte(eventData),
