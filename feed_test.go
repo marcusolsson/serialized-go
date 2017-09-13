@@ -9,27 +9,11 @@ import (
 
 func TestFeed(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`{
-  "entries": [
-    {
-      "sequenceNumber": 12314,
-      "aggregateId": "22c3780f-6dcb-440f-8532-6693be83f21c",
-      "timestamp": 1503386583474,
-      "events": [
-        {
-          "eventId": "f2c8bfc1-c702-4f1a-b295-ef113ed7c8be",
-          "eventType": "PaymentProcessed",
-          "data": {
-            "paymentMethod": "CARD",
-            "amount": 1000,
-            "currency": "SEK"
-          }
-        }
-      ]
-    }
-  ],
-  "hasMore": false
-}`))
+		b, err := loadJSON("testdata/feed_log_response.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		w.Write(b)
 	}))
 
 	c := NewClient(

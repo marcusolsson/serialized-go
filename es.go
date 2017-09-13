@@ -18,8 +18,8 @@ type Aggregate struct {
 func (c *Client) Store(aggType, aggID string, version int64, events ...Event) error {
 	reqBody := struct {
 		AggregateID     string  `json:"aggregateId"`
-		ExpectedVersion int64   `json:"expectedVersion,omitempty"`
 		Events          []Event `json:"events"`
+		ExpectedVersion int64   `json:"expectedVersion,omitempty"`
 	}{
 		AggregateID:     aggID,
 		ExpectedVersion: version,

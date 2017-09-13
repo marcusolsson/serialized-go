@@ -1,0 +1,13 @@
+{
+    "reactionId": "be278b27-8687-42b4-a502-164a6702797c",
+    "reactionName": "PaymentProcessedEmailReaction",
+    "feedName": "payment",
+    "eventType": "PaymentProcessed",
+    "delay": "PT1H",
+    "action": {
+        "httpMethod": "POST",
+        "targetUri": "https://your-webhook",
+        "body": "A new payment was processed",
+        "actionType": "HTTP"
+    }
+}   

@@ -41,7 +41,7 @@ func (c *Client) Feeds() ([]string, error) {
 }
 
 // Feed returns the feed for a given aggregate.
-func (c *Client) Feed(name string, since int) (Feed, error) {
+func (c *Client) Feed(name string, since int64) (Feed, error) {
 	u := &url.URL{
 		Path: "/feeds/" + name,
 	}

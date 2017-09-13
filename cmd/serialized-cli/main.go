@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 	"text/tabwriter"
-	"time"
 
 	serialized "github.com/marcusolsson/serialized-go"
+	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
 )
 
@@ -22,8 +22,45 @@ func main() {
 		serialized.WithSecretAccessKey(secretAccessKey),
 	)
 
-	var since int
+	var since int64
 	var current bool
+	var maxNumEvents int
+
+	var (
+		eventType       string
+		eventID         string
+		eventData       string
+		expectedVersion int64
+	)
+
+	var cmdStore = &cobra.Command{
+		Use:   "store [type] [id]",
+		Short: "Store a new event",
+		Args:  cobra.MinimumNArgs(2),
+		Run: func(cmd *cobra.Command, args []string) {
+			if eventID == "" {
+				eventID = uuid.NewV4().String()
+			}
+			if eventType == "" {
+				fmt.Println("event type was not specified")
+				os.Exit(1)
+			}
+			if eventData == "" {
+				fmt.Println("event data was empty")
+				os.Exit(1)
+			}
+
+			event := serialized.Event{
+				Type: eventType,
+				ID:   eventID,
+				Data: []byte(eventData),
+			}
+
+			if err := client.Store(args[0], args[1], expectedVersion, event); err != nil {
+				log.Fatal(err)
+			}
+		},
+	}
 
 	var cmdAggregate = &cobra.Command{
 		Use:   "aggregate [type] [id]",
@@ -41,7 +78,7 @@ func main() {
 			fmt.Fprintln(w, "ID:", "\t", agg.ID)
 			fmt.Fprintln(w, "VERSION:", "\t", agg.Version)
 			fmt.Fprintln(w)
-			fmt.Fprintln(w, "Showing the 10 most recent events:")
+			fmt.Fprintf(w, "Showing the %d most recent events:\n", maxNumEvents)
 			fmt.Fprintln(w)
 
 			w.Flush()
@@ -49,8 +86,8 @@ func main() {
 			fmt.Fprintln(w, "ID:", "\t", "Type:", "\t", "Data:")
 
 			events := agg.Events
-			if len(events) > 5 {
-				events = events[:5]
+			if len(events) > maxNumEvents {
+				events = events[len(events)-maxNumEvents:]
 			}
 
 			for _, e := range events {
@@ -82,12 +119,17 @@ func main() {
 				log.Fatal(err)
 			}
 
-			w := tabwriter.NewWriter(os.Stdout, 5, 4, 1, ' ', 0)
-			fmt.Fprintln(w, "SEQUENCE\tAGGREGATE ID\tNUM EVENTS\tTIMESTAMP")
+			w := tabwriter.NewWriter(os.Stdout, 5, 5, 2, ' ', 0)
+			fmt.Fprintln(w, "SEQUENCE", "\t", "AGGREGATE", "\t", "EVENTS")
 
 			for _, e := range feed.Entries {
-				t := time.Unix(e.Timestamp/1000, 0)
-				fmt.Fprintf(w, "%d\t%s\t%d\t%s\n", e.SequenceNumber, e.AggregateID, len(e.Events), t.Format(time.RFC3339))
+				fmt.Fprintf(w, "%d\t%s\t%s\n", e.SequenceNumber, e.AggregateID, e.Events[0].Data)
+
+				if len(e.Events) > 1 {
+					for _, ev := range e.Events[1:] {
+						fmt.Fprintf(w, "\t\t%s\n", string(ev.Data))
+					}
+				}
 			}
 			w.Flush()
 		},
@@ -107,10 +149,17 @@ func main() {
 		},
 	}
 
-	cmdFeed.Flags().IntVarP(&since, "since", "s", 0, "Optional sequence number to start from.")
+	cmdStore.Flags().StringVarP(&eventID, "id", "i", "", "Optional event ID.")
+	cmdStore.Flags().StringVarP(&eventType, "type", "t", "", "Event type")
+	cmdStore.Flags().StringVarP(&eventData, "data", "d", "", "Event data")
+	cmdStore.Flags().Int64VarP(&expectedVersion, "expected-version", "v", 0, "Version number for optimistic concurrency control.")
+
+	cmdAggregate.Flags().IntVarP(&maxNumEvents, "max-events", "m", 10, "Maximum number of events to show in preview.")
+
+	cmdFeed.Flags().Int64VarP(&since, "since", "s", 0, "Sequence number to start from.")
 	cmdFeed.Flags().BoolVarP(&current, "current", "c", false, "Return current sequence number at head for a given feed.")
 
 	var rootCmd = &cobra.Command{Use: "serialized-cli"}
-	rootCmd.AddCommand(cmdAggregate, cmdFeed, cmdFeeds)
+	rootCmd.AddCommand(cmdStore, cmdAggregate, cmdFeed, cmdFeeds)
 	rootCmd.Execute()
 }

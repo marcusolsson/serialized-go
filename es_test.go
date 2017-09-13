@@ -1,8 +1,6 @@
 package serialized
 
 import (
-	"bytes"
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -17,24 +15,15 @@ type testPaymentProcessed struct {
 
 func TestStore(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		want := []byte(`{"aggregateId":"123","events":[{"eventId":"456","eventType":"PaymentProcessed","data":{"paymentMethod":"CARD","amount":1000,"currency":"SEK"}}]}`)
-
 		got, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			t.Fatal(err)
 		}
-
-		got = bytes.TrimSpace(got)
-
-		if !bytes.Equal(got, want) {
-			var wantIndent bytes.Buffer
-			json.Indent(&wantIndent, want, "", "\t")
-
-			var gotIndent bytes.Buffer
-			json.Indent(&gotIndent, got, "", "\t")
-
-			t.Errorf("unexpected request body =\n%s\n\nwant =\n%s", got, want)
+		want, err := loadJSON("testdata/event_store_request.json")
+		if err != nil {
+			t.Fatal(err)
 		}
+		assertEqualJSON(t, got, want)
 	}))
 
 	c := NewClient(
@@ -47,7 +36,8 @@ func TestStore(t *testing.T) {
 		Currency:      "SEK",
 	}
 
-	err := c.Store("payment", "123", 0, NewEvent("456", "PaymentProcessed", pp))
+	err := c.Store("payment", "2c3cf88c-ee88-427e-818a-ab0267511c84", 1,
+		NewEvent("f2c8bfc1-c702-4f1a-b295-ef113ed7c8be", "PaymentProcessed", pp, "string"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,22 +68,11 @@ func TestAggregateExists(t *testing.T) {
 
 func TestLoadAggregate(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`{
-  "aggregateId": "22c3780f-6dcb-440f-8532-6693be83f21c",
-  "aggregateVersion": 1,
-  "aggregateType": "payment",
-  "events": [
-    {
-      "eventId": "f2c8bfc1-c702-4f1a-b295-ef113ed7c8be",
-      "eventType": "PaymentProcessed",
-      "data": {
-        "paymentMethod": "CARD",
-        "amount": 1000,
-        "currency": "SEK"
-      }
-    }
-  ]
-}`))
+		b, err := loadJSON("testdata/event_load_response.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		w.Write(b)
 	}))
 
 	c := NewClient(

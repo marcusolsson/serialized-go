@@ -7,9 +7,9 @@ import (
 
 // Reaction holds a Serialized.io Reaction.
 type Reaction struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	Feed      string `json:"feed"`
+	ID        string `json:"reactionId"`
+	Name      string `json:"reactionName"`
+	Feed      string `json:"feedName"`
 	EventType string `json:"eventType"`
 	Delay     string `json:"delay"`
 	Action    Action `json:"action"`
