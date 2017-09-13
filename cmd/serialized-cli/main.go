@@ -159,7 +159,10 @@ func main() {
 	cmdFeed.Flags().Int64VarP(&since, "since", "s", 0, "Sequence number to start from.")
 	cmdFeed.Flags().BoolVarP(&current, "current", "c", false, "Return current sequence number at head for a given feed.")
 
-	var rootCmd = &cobra.Command{Use: "serialized-cli"}
+	var rootCmd = &cobra.Command{
+		Use:   "serialized-cli",
+		Short: "Interact with the Serialized.io API from the command-line.",
+	}
 	rootCmd.AddCommand(cmdStore, cmdAggregate, cmdFeed, cmdFeeds)
 	rootCmd.Execute()
 }
