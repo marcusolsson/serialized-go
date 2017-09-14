@@ -119,25 +119,15 @@ func main() {
 				return
 			}
 
-			feed, err := client.Feed(ctx, args[0], since)
+			err := client.Feed(ctx, args[0], func(e *serialized.FeedEntry) {
+				for _, ev := range e.Events {
+					fmt.Printf("[%s]\t%s\n", ev.Type, ev.Data)
+				}
+			})
 			if err != nil {
-				fmt.Println("unable to get feed:", err)
+				fmt.Println("error while getting feed:", err)
 				os.Exit(1)
 			}
-
-			w := tabwriter.NewWriter(os.Stdout, 5, 5, 2, ' ', 0)
-			fmt.Fprintln(w, "SEQUENCE", "\t", "AGGREGATE", "\t", "EVENTS")
-
-			for _, e := range feed.Entries {
-				fmt.Fprintf(w, "%d\t%s\t%s\n", e.SequenceNumber, e.AggregateID, e.Events[0].Data)
-
-				if len(e.Events) > 1 {
-					for _, ev := range e.Events[1:] {
-						fmt.Fprintf(w, "\t\t%s\n", string(ev.Data))
-					}
-				}
-			}
-			w.Flush()
 		},
 	}
 

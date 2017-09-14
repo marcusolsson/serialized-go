@@ -7,12 +7,15 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 // Client for the Serialized.io API.
 type Client struct {
 	baseURL   *url.URL
 	userAgent string
+
+	pollInterval time.Duration
 
 	accessKey       string
 	secretAccessKey string
@@ -27,8 +30,9 @@ func NewClient(opts ...func(*Client)) *Client {
 			Scheme: "https",
 			Host:   "api.serialized.io",
 		},
-		userAgent:  "serialized-go/0.1.0",
-		httpClient: &http.Client{},
+		userAgent:    "serialized-go/0.1.0",
+		pollInterval: 2 * time.Second,
+		httpClient:   &http.Client{},
 	}
 
 	for _, f := range opts {
@@ -58,6 +62,13 @@ func WithAccessKey(key string) func(*Client) {
 func WithSecretAccessKey(key string) func(*Client) {
 	return func(c *Client) {
 		c.secretAccessKey = key
+	}
+}
+
+// WithPollInterval sets the interval used for polling the API.
+func WithPollInterval(d time.Duration) func(*Client) {
+	return func(c *Client) {
+		c.pollInterval = d
 	}
 }
 

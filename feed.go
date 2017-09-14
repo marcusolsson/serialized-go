@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 // Feed holds a Serialized.io feed.
@@ -45,8 +46,36 @@ func (c *Client) Feeds(ctx context.Context) ([]string, error) {
 	return response.Feeds, nil
 }
 
-// Feed returns the feed for a given aggregate.
-func (c *Client) Feed(ctx context.Context, name string, since int64) (*Feed, error) {
+// Feed runs the given function for every feed entry. This call blocks until
+// the provided context is cancelled.
+func (c *Client) Feed(ctx context.Context, name string, fn func(*FeedEntry)) error {
+	var seq int64
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(c.pollInterval):
+			for {
+				f, err := c.feed(ctx, name, seq)
+				if err != nil {
+					return err
+				}
+
+				for _, e := range f.Entries {
+					fn(e)
+					seq = e.SequenceNumber
+				}
+
+				if !f.HasMore {
+					break
+				}
+			}
+		}
+	}
+}
+
+func (c *Client) feed(ctx context.Context, name string, since int64) (*Feed, error) {
 	u := &url.URL{
 		Path: "/feeds/" + name,
 	}
