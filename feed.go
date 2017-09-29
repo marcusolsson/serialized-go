@@ -48,9 +48,7 @@ func (c *Client) Feeds(ctx context.Context) ([]string, error) {
 
 // Feed runs the given function for every feed entry. This call blocks until
 // the provided context is cancelled.
-func (c *Client) Feed(ctx context.Context, name string, fn func(*FeedEntry)) error {
-	var seq int64
-
+func (c *Client) Feed(ctx context.Context, name string, seq int64, fn func(*FeedEntry)) error {
 	for {
 		select {
 		case <-ctx.Done():
