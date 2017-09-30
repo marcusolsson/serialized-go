@@ -21,7 +21,7 @@ func main() {
 		serialized.WithSecretAccessKey(secretAccessKey),
 	)
 
-	err := client.Feed(context.Background(), "order", func(entry *serialized.FeedEntry) {
+	err := client.Feed(context.Background(), "order", 0, func(entry *serialized.FeedEntry) {
 		for _, event := range entry.Events {
 			switch event.Type {
 			case "OrderPlacedEvent":
