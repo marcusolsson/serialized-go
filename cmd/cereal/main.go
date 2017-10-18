@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/alecthomas/kingpin"
@@ -17,10 +18,12 @@ var (
 	app = kingpin.New("serialized-cli", "Interact with the Serialized.io API from the command-line.").Version("0.1.0")
 
 	store                = app.Command("store", "Store a new event.")
-	storeType            = store.Flag("type", "Type of event.").Short('t').Required().String()
-	storeID              = store.Flag("id", "ID of event.").String()
+	storeAggType         = store.Flag("agg-type", "Type of aggregate.").Required().String()
+	storeAggID           = store.Flag("agg-id", "ID of aggregate.").String()
+	storeEventType       = store.Flag("event-type", "Type of event.").Required().String()
+	storeEventID         = store.Flag("event-id", "ID of event.").String()
 	storeData            = store.Flag("data", "Event data.").Short('d').Required().String()
-	storeExpectedVersion = store.Flag("expected-version", "Version number for optimistic concurrency control.").Short('v').Int64()
+	storeExpectedVersion = store.Flag("expected-version", "Version number for optimistic concurrency control.").Int64()
 
 	aggregate      = app.Command("aggregate", "Display an aggregate.")
 	aggregateID    = aggregate.Arg("id", "ID of aggregate.").Required().String()
@@ -48,18 +51,18 @@ func main() {
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	case store.FullCommand():
-		id := *storeID
-		if id == "" {
-			id = uuid.NewV4().String()
+		eventID := *storeEventID
+		if eventID == "" {
+			eventID = uuid.NewV4().String()
 		}
 
 		event := &serialized.Event{
-			Type: *storeType,
-			ID:   id,
+			Type: *storeEventType,
+			ID:   eventID,
 			Data: []byte(*storeData),
 		}
 
-		err := client.Store(context.Background(), *storeType, id, *storeExpectedVersion, event)
+		err := client.Store(context.Background(), *storeAggType, *storeAggID, *storeExpectedVersion, event)
 		if err != nil {
 			kingpin.Fatalf("unable to store event: %s", err)
 		}
@@ -102,13 +105,17 @@ func main() {
 			return
 		}
 
+		w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
+		fmt.Fprintln(w, strings.Join([]string{"EVENT ID", "EVENT TYPE", "AGGREGATE ID", "DATA"}, "\t"))
+
 		err := client.Feed(ctx, *feedName, *feedSince, func(e *serialized.FeedEntry) {
 			for _, ev := range e.Events {
 				var buf bytes.Buffer
 				if err := json.Compact(&buf, ev.Data); err != nil {
 					kingpin.Fatalf("unable to format event data: %s", err)
 				}
-				fmt.Println(buf.String())
+				fmt.Fprintln(w, strings.Join([]string{ev.ID, ev.Type, e.AggregateID, buf.String()}, "\t"))
+				w.Flush()
 			}
 		})
 		if err != nil {
