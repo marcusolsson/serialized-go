@@ -1,0 +1,6 @@
+{
+    "projectionId": "string (uuid)",
+    "data": {
+        "field": "data"
+    }
+}

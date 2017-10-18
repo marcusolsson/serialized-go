@@ -1,0 +1,22 @@
+{
+    "definitions": [
+        {
+            "projectionName": "orders",
+            "feedName": "order",
+            "handlers": [
+                {
+                    "eventType": "OrderCancelledEvent",
+                    "functions": [
+                        {
+                            "name": "inc",
+                            "targetSelector": "$.projection.orders[?]",
+                            "eventSelector": "$.event[?]",
+                            "targetFilter": "@.orderId == $.event.orderId",
+                            "eventFilter": "@.orderAmount > 4000"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
