@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/alecthomas/kingpin"
 	serialized "github.com/marcusolsson/serialized-go"
@@ -53,7 +54,11 @@ func main() {
 	case store.FullCommand():
 		eventID := *storeEventID
 		if eventID == "" {
-			eventID = uuid.NewV4().String()
+			id, err := uuid.NewV4()
+			if err != nil {
+				kingpin.Fatalf("unable to create uuid: %s", err)
+			}
+			eventID = id.String()
 		}
 
 		event := &serialized.Event{
@@ -105,16 +110,17 @@ func main() {
 			return
 		}
 
-		w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
-		fmt.Fprintln(w, strings.Join([]string{"EVENT ID", "EVENT TYPE", "AGGREGATE ID", "DATA"}, "\t"))
+		w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, '\t', 0)
+		fmt.Fprintln(w, strings.Join([]string{"TIMESTAMP", "AGGREGATE ID", "EVENT TYPE"}, "\t"))
 
 		err := client.Feed(ctx, *feedName, *feedSince, func(e *serialized.FeedEntry) {
+			ts := time.Unix(e.Timestamp/1000, 0)
 			for _, ev := range e.Events {
 				var buf bytes.Buffer
 				if err := json.Compact(&buf, ev.Data); err != nil {
 					kingpin.Fatalf("unable to format event data: %s", err)
 				}
-				fmt.Fprintln(w, strings.Join([]string{ev.ID, ev.Type, e.AggregateID, buf.String()}, "\t"))
+				fmt.Fprintln(w, strings.Join([]string{ts.Format(time.RFC1123Z), e.AggregateID, ev.Type}, "\t"))
 				w.Flush()
 			}
 		})
