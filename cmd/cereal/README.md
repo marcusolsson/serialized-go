@@ -8,6 +8,14 @@ A command-line interface for the Serialized.io API.
 go get -u github.com/marcusolsson/serialized-go/cmd/cereal
 ```
 
+## Usage
+
+```
+export SERIALIZED_ACCESS_KEY=<accessKey>
+export SERIALIZED_SECRET_ACCESS_KEY=<secretAccessKey>
+cereal feeds
+```
+
 ## Examples
 
 ### Show aggregate information
