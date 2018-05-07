@@ -1,4 +1,4 @@
-# serialized-cli
+# Cereal
 
 A command-line interface for the Serialized.io API.
 
