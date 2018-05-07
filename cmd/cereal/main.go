@@ -101,7 +101,7 @@ func main() {
 
 		w.Flush()
 
-		fmt.Fprintln(w, "ID", "\t", "TYPE", "\t", "DATA")
+		fmt.Fprintln(w, "EVENT ID", "\t", "TYPE", "\t", "DATA")
 
 		events := agg.Events
 		if len(events) > *aggregateLimit {
