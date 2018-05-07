@@ -6,7 +6,7 @@
             "eventType": "OrderCancelledEvent",
             "functions": [
                 {
-                    "name": "inc",
+                    "function": "inc",
                     "targetSelector": "$.projection.orders[?]",
                     "eventSelector": "$.event[?]",
                     "targetFilter": "@.orderId == $.event.orderId",

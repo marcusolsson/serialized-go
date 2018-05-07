@@ -28,8 +28,12 @@ var (
 
 	aggregate      = app.Command("aggregate", "Display an aggregate.")
 	aggregateID    = aggregate.Arg("id", "ID of aggregate.").Required().String()
-	aggregateType  = aggregate.Flag("type", "Type of aggregate.").Short('t').String()
+	aggregateType  = aggregate.Flag("type", "Type of aggregate.").Short('t').Required().String()
 	aggregateLimit = aggregate.Flag("limit", "Max number of events to show in preview.").Short('l').Default("10").Int()
+
+	projection      = app.Command("projection", "Display a projection.")
+	projectionName  = projection.Arg("name", "Name of the projection.").Required().String()
+	projectionAggID = projection.Flag("agg-id", "ID of aggregate.").Required().String()
 
 	feed        = app.Command("feed", "Display the feed.")
 	feedName    = feed.Arg("name", "Name of feed.").Required().String()
@@ -56,9 +60,18 @@ func main() {
 		if eventID == "" {
 			id, err := uuid.NewV4()
 			if err != nil {
-				kingpin.Fatalf("unable to create uuid: %s", err)
+				kingpin.Fatalf("Unable to create uuid: %s", err)
 			}
 			eventID = id.String()
+		}
+
+		aggID := *storeAggID
+		if aggID == "" {
+			id, err := uuid.NewV4()
+			if err != nil {
+				kingpin.Fatalf("Unable to create uuid: %s", err)
+			}
+			aggID = id.String()
 		}
 
 		event := &serialized.Event{
@@ -67,36 +80,55 @@ func main() {
 			Data: []byte(*storeData),
 		}
 
-		err := client.Store(context.Background(), *storeAggType, *storeAggID, *storeExpectedVersion, event)
+		err := client.Store(context.Background(), *storeAggType, aggID, *storeExpectedVersion, event)
 		if err != nil {
-			kingpin.Fatalf("unable to store event: %s", err)
+			kingpin.Fatalf("Unable to store event: %s", err)
 		}
+
 	case aggregate.FullCommand():
 		agg, err := client.LoadAggregate(context.Background(), *aggregateType, *aggregateID)
 		if err != nil {
-			kingpin.Fatalf("unable to load aggregate: %s", err)
+			kingpin.Fatalf("Unable to load aggregate: %s", err)
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 5, 4, 1, ' ', 0)
-		fmt.Fprintln(w, "TYPE:", "\t", agg.Type)
+		fmt.Fprintln(w, "Type:", "\t", agg.Type)
 		fmt.Fprintln(w, "ID:", "\t", agg.ID)
-		fmt.Fprintln(w, "VERSION:", "\t", agg.Version)
+		fmt.Fprintln(w, "Version:", "\t", agg.Version)
 		fmt.Fprintln(w)
 		fmt.Fprintf(w, "Showing the %d most recent events:\n", *aggregateLimit)
 		fmt.Fprintln(w)
 
 		w.Flush()
 
-		fmt.Fprintln(w, "ID:", "\t", "Type:", "\t", "Data:")
+		fmt.Fprintln(w, "ID", "\t", "TYPE", "\t", "DATA")
 
 		events := agg.Events
 		if len(events) > *aggregateLimit {
 			events = events[len(events)-*aggregateLimit:]
 		}
 		for _, e := range events {
-			fmt.Fprintln(w, e.ID, "\t", e.Type, "\t", string(e.Data))
+			var buf bytes.Buffer
+			if err := json.Compact(&buf, e.Data); err != nil {
+				kingpin.Fatalf("Unable to show aggregate data: %s", err)
+			}
+			fmt.Fprintln(w, e.ID, "\t", e.Type, "\t", buf.String())
 		}
 		w.Flush()
+
+	case projection.FullCommand():
+		ctx := context.Background()
+
+		proj, err := client.Projection(ctx, *projectionName, *projectionAggID)
+		if err != nil {
+			kingpin.Fatalf("Unable to load projection: %s", err)
+		}
+
+		var buf bytes.Buffer
+		if err := json.Indent(&buf, proj.Data, "", "  "); err != nil {
+			kingpin.Fatalf("Unable to show projection data: %s", err)
+		}
+		fmt.Println(buf.String())
 
 	case feed.FullCommand():
 		ctx := context.Background()
@@ -104,7 +136,7 @@ func main() {
 		if *feedCurrent {
 			seq, err := client.FeedSequenceNumber(ctx, *feedName)
 			if err != nil {
-				kingpin.Fatalf("unable to get sequence number: %s", err)
+				kingpin.Fatalf("Unable to get sequence number: %s", err)
 			}
 			fmt.Println(seq)
 			return
@@ -125,12 +157,13 @@ func main() {
 			}
 		})
 		if err != nil {
-			kingpin.Fatalf("unable to get feed: %s", err)
+			kingpin.Fatalf("Unable to get feed: %s", err)
 		}
+
 	case feeds.FullCommand():
 		feeds, err := client.Feeds(context.Background())
 		if err != nil {
-			kingpin.Fatalf("unable to get feeds: %s", err)
+			kingpin.Fatalf("Unable to get feeds: %s", err)
 		}
 		for _, f := range feeds {
 			fmt.Println(f)

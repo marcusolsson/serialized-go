@@ -63,7 +63,7 @@ func TestProjectionCreateDefinition(t *testing.T) {
 				EventType: "OrderCancelledEvent",
 				Functions: []*Function{
 					{
-						Name:           "inc",
+						Function:       "inc",
 						TargetSelector: "$.projection.orders[?]",
 						EventSelector:  "$.event[?]",
 						TargetFilter:   "@.orderId == $.event.orderId",

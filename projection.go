@@ -24,7 +24,7 @@ type EventHandler struct {
 }
 
 type Function struct {
-	Name           string `json:"name"`
+	Function       string `json:"function"`
 	TargetSelector string `json:"targetSelector"`
 	EventSelector  string `json:"eventSelector"`
 	TargetFilter   string `json:"targetFilter"`
