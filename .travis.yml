@@ -1,0 +1,12 @@
+language: go
+
+go:
+  - 1.10.2
+  - 1.9.6
+  - 1.8.7
+
+sudo: false
+
+script:
+  - go vet ./...
+  - go test ./...
