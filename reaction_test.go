@@ -52,16 +52,14 @@ func TestCreateReaction(t *testing.T) {
 	)
 
 	r := &Reaction{
-		ID:        "be278b27-8687-42b4-a502-164a6702797c",
-		Name:      "PaymentProcessedEmailReaction",
-		Feed:      "payment",
-		EventType: "PaymentProcessed",
-		Delay:     "PT1H",
-		Action: Action{
-			HTTPMethod: "POST",
-			TargetURI:  "https://your-webhook",
-			Body:       "A new payment was processed",
-			ActionType: "HTTP",
+		Name:               "payment-processed-email-reaction",
+		Feed:               "payment",
+		ReactOnEventType:   "PaymentProcessed",
+		CancelOnEventTypes: []string{"OrderCanceledEvent"},
+		TriggerTimeField:   "my.event.data.field",
+		Offset:             "PT1H",
+		Action: &Action{
+			ActionType: ActionTypeHTTPPost,
 		},
 	}
 
@@ -78,7 +76,7 @@ func TestDeleteReaction(t *testing.T) {
 		WithBaseURL(ts.URL),
 	)
 
-	if err := c.DeleteReaction(context.Background(), "be278b27-8687-42b4-a502-164a6702797c"); err != nil {
+	if err := c.DeleteReaction(context.Background(), "payment-processed-email-reaction"); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -97,20 +95,18 @@ func TestGetReaction(t *testing.T) {
 	)
 
 	want := &Reaction{
-		ID:        "be278b27-8687-42b4-a502-164a6702797c",
-		Name:      "PaymentProcessedEmailReaction",
-		Feed:      "payment",
-		EventType: "PaymentProcessed",
-		Delay:     "PT1H",
-		Action: Action{
-			HTTPMethod: "POST",
-			TargetURI:  "https://your-webhook",
-			Body:       "A new payment was processed",
-			ActionType: "HTTP",
+		Name:               "payment-processed-email-reaction",
+		Feed:               "payment",
+		ReactOnEventType:   "PaymentProcessed",
+		CancelOnEventTypes: []string{"OrderCanceledEvent"},
+		TriggerTimeField:   "my.event.data.field",
+		Offset:             "PT1H",
+		Action: &Action{
+			ActionType: ActionTypeHTTPPost,
 		},
 	}
 
-	got, err := c.Reaction(context.Background(), want.ID)
+	got, err := c.Reaction(context.Background(), want.Name)
 	if err != nil {
 		t.Fatal(err)
 	}

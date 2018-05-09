@@ -8,20 +8,29 @@ import (
 
 // Reaction holds a Serialized.io Reaction.
 type Reaction struct {
-	ID        string `json:"reactionId"`
-	Name      string `json:"reactionName"`
-	Feed      string `json:"feedName"`
-	EventType string `json:"eventType"`
-	Delay     string `json:"delay"`
-	Action    Action `json:"action"`
+	Name               string   `json:"reactionName,omitempty"`
+	Feed               string   `json:"feedName,omitempty"`
+	ReactOnEventType   string   `json:"reactOnEventType,omitempty"`
+	CancelOnEventTypes []string `json:"cancelOnEventTypes,omitempty"`
+	TriggerTimeField   string   `json:"triggerTimeField,omitempty"`
+	Offset             string   `json:"offset,omitempty"`
+	Action             *Action  `json:"action,omitempty"`
 }
 
-// Action holds a Serialized.io Action.
+// ActionType represents a reaction action.
+type ActionType string
+
+// Available action types.
+const (
+	ActionTypeHTTPPost  ActionType = "HTTP_POST"
+	ActionTypeSlackPost ActionType = "SLACK_POST"
+)
+
+// Action defines a react action.
 type Action struct {
-	HTTPMethod string `json:"httpMethod"`
-	TargetURI  string `json:"targetUri"`
-	Body       string `json:"body"`
-	ActionType string `json:"actionType"`
+	ActionType ActionType `json:"actionType,omitempty"`
+	TargetURI  string     `json:"targetUri,omitempty"`
+	Body       string     `json:"body,omitempty"`
 }
 
 // CreateReaction registers a new reaction.
@@ -47,7 +56,7 @@ func (c *Client) ListReactions(ctx context.Context) ([]*Reaction, error) {
 	}
 
 	var response struct {
-		Reactions []*Reaction `json:"reactions"`
+		Definitions []*Reaction `json:"definitions"`
 	}
 
 	resp, err := c.do(ctx, req, &response)
@@ -55,7 +64,7 @@ func (c *Client) ListReactions(ctx context.Context) ([]*Reaction, error) {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	return response.Reactions, err
+	return response.Definitions, err
 }
 
 // DeleteReaction deletes a reaction with a given ID.
