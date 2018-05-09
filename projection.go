@@ -7,22 +7,26 @@ import (
 	"net/http"
 )
 
+// Projection represents a model used to present your event data.
 type Projection struct {
 	ID   string          `json:"projectionId,omitempty"`
 	Data json.RawMessage `json:"data,omitempty"`
 }
 
+// ProjectionDefinition contains the logic for how to build a projection.
 type ProjectionDefinition struct {
 	Name     string          `json:"projectionName,omitempty"`
 	Feed     string          `json:"feedName,omitempty"`
 	Handlers []*EventHandler `json:"handlers,omitempty"`
 }
 
+// EventHandler contains the functions for modifying the current state of a projection.
 type EventHandler struct {
 	EventType string      `json:"eventType,omitempty"`
 	Functions []*Function `json:"functions,omitempty"`
 }
 
+// Function contains the templates for modifying projections.
 type Function struct {
 	Function       string      `json:"function,omitempty"`
 	TargetSelector string      `json:"targetSelector,omitempty"`
