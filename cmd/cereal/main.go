@@ -119,7 +119,7 @@ func main() {
 	case projection.FullCommand():
 		ctx := context.Background()
 
-		proj, err := client.Projection(ctx, *projectionName, *projectionAggID)
+		proj, err := client.SingleProjection(ctx, *projectionName, *projectionAggID)
 		if err != nil {
 			kingpin.Fatalf("Unable to load projection: %s", err)
 		}

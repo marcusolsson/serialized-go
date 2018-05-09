@@ -111,7 +111,7 @@ func TestProjectionGetSingle(t *testing.T) {
 		WithBaseURL(ts.URL),
 	)
 
-	proj, err := c.Projection(context.Background(), "orders", "foo")
+	proj, err := c.SingleProjection(context.Background(), "orders", "foo")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,5 +121,31 @@ func TestProjectionGetSingle(t *testing.T) {
 	}
 	if want := []byte(`{"field":"data"}`); !bytes.Equal(want, proj.Data) {
 		t.Fatalf("want = %s; got = %s", want, string(proj.Data))
+	}
+}
+
+func TestProjectionListSingle(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, err := loadJSON("testdata/projection_list_single_response.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		w.Write(b)
+	}))
+
+	c := NewClient(
+		WithBaseURL(ts.URL),
+	)
+
+	projs, err := c.ListSingleProjections(context.Background(), "foo")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(projs) != 1 {
+		t.Fatalf("unexpected number of definitions = %d; want = %d", len(projs), 1)
+	}
+	if projs[0].ID != "string (uuid)" {
+		t.Fatalf("unexpected projection id: %s", projs[0].ID)
 	}
 }

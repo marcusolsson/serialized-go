@@ -81,8 +81,8 @@ func (c *Client) DeleteProjectionDefinition(ctx context.Context, name string) er
 	return err
 }
 
-// Projection returns a projection for the given aggregate.
-func (c *Client) Projection(ctx context.Context, projName, aggID string) (*Projection, error) {
+// SingleProjection returns a single projection for the given aggregate.
+func (c *Client) SingleProjection(ctx context.Context, projName, aggID string) (*Projection, error) {
 	req, err := c.newRequest("GET", "/projections/single/"+projName+"/"+aggID, nil)
 	if err != nil {
 		return nil, err
@@ -96,4 +96,23 @@ func (c *Client) Projection(ctx context.Context, projName, aggID string) (*Proje
 	}
 
 	return &proj, err
+}
+
+// ListSingleProjections lists all single projections.
+func (c *Client) ListSingleProjections(ctx context.Context, name string) ([]*Projection, error) {
+	req, err := c.newRequest("GET", "/projections/single/"+name, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var response struct {
+		Projections []*Projection `json:"projections"`
+	}
+
+	resp, err := c.do(ctx, req, &response)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	return response.Projections, err
 }
