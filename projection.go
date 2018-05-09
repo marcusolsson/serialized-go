@@ -32,6 +32,7 @@ type Function struct {
 	RawData        interface{} `json:"rawData,omitempty"`
 }
 
+// ListProjectionDefinitions lists all definitions.
 func (c *Client) ListProjectionDefinitions(ctx context.Context) ([]*ProjectionDefinition, error) {
 	req, err := c.newRequest("GET", "/projections/definitions", nil)
 	if err != nil {
@@ -50,6 +51,7 @@ func (c *Client) ListProjectionDefinitions(ctx context.Context) ([]*ProjectionDe
 	return response.Definitions, err
 }
 
+// CreateProjectionDefinition creates a new reaction definition.
 func (c *Client) CreateProjectionDefinition(ctx context.Context, d *ProjectionDefinition) error {
 	req, err := c.newRequest("POST", "/projections/definitions", d)
 	if err != nil {
@@ -64,6 +66,22 @@ func (c *Client) CreateProjectionDefinition(ctx context.Context, d *ProjectionDe
 	return err
 }
 
+// DeleteProjectionDefinition deletes a projection definition.
+func (c *Client) DeleteProjectionDefinition(ctx context.Context, name string) error {
+	req, err := c.newRequest("DELETE", "/projections/definitions/"+name, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.do(ctx, req, nil)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	return err
+}
+
+// Projection returns a projection for the given aggregate.
 func (c *Client) Projection(ctx context.Context, projName, aggID string) (*Projection, error) {
 	req, err := c.newRequest("GET", "/projections/single/"+projName+"/"+aggID, nil)
 	if err != nil {

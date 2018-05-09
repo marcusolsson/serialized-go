@@ -79,6 +79,25 @@ func TestProjectionCreateDefinition(t *testing.T) {
 	}
 }
 
+func TestProjectionDeleteDefinition(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "DELETE" {
+			t.Fatalf("unexpected method: %s", r.Method)
+		}
+		if r.URL.Path != "/projections/definitions/foo" {
+			t.Fatalf("unexpected path: %s", r.URL.Path)
+		}
+	}))
+
+	c := NewClient(
+		WithBaseURL(ts.URL),
+	)
+
+	if err := c.DeleteProjectionDefinition(context.Background(), "foo"); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestProjectionGetSingle(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, err := loadJSON("testdata/projection_get_single_response.json")
