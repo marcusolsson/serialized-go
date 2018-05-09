@@ -66,6 +66,23 @@ func (c *Client) CreateProjectionDefinition(ctx context.Context, d *ProjectionDe
 	return err
 }
 
+// ProjectionDefinition returns a projection definition by name.
+func (c *Client) ProjectionDefinition(ctx context.Context, name string) (*ProjectionDefinition, error) {
+	req, err := c.newRequest("GET", "/projections/definitions/"+name, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var pd ProjectionDefinition
+
+	resp, err := c.do(ctx, req, &pd)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	return &pd, err
+}
+
 // DeleteProjectionDefinition deletes a projection definition.
 func (c *Client) DeleteProjectionDefinition(ctx context.Context, name string) error {
 	req, err := c.newRequest("DELETE", "/projections/definitions/"+name, nil)

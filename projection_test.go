@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 )
 
@@ -76,6 +77,48 @@ func TestProjectionCreateDefinition(t *testing.T) {
 
 	if err := c.CreateProjectionDefinition(context.Background(), def); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestProjectionGetDefinition(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, err := loadJSON("testdata/projection_get_definition_response.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		w.Write(b)
+	}))
+
+	c := NewClient(
+		WithBaseURL(ts.URL),
+	)
+
+	got, err := c.ProjectionDefinition(context.Background(), "orders")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := &ProjectionDefinition{
+		Name: "orders",
+		Feed: "order",
+		Handlers: []*EventHandler{
+			{
+				EventType: "OrderCancelledEvent",
+				Functions: []*Function{
+					{
+						Function:       "inc",
+						TargetSelector: "$.projection.orders[?]",
+						EventSelector:  "$.event[?]",
+						TargetFilter:   "@.orderId == $.event.orderId",
+						EventFilter:    "@.orderAmount > 4000",
+					},
+				},
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got = %s; want = %s", got, want)
 	}
 }
 
