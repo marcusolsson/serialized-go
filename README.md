@@ -18,12 +18,12 @@ go get github.com/marcusolsson/serialized-go
 package main
 
 import (
-	"context"
-	"fmt"
-	"log"
-	"os"
+    "context"
+    "fmt"
+    "log"
+    "os"
 
-	serialized "github.com/marcusolsson/serialized-go"
+    serialized "github.com/marcusolsson/serialized-go"
 )
 
 func main() {
