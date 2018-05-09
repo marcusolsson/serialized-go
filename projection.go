@@ -24,11 +24,12 @@ type EventHandler struct {
 }
 
 type Function struct {
-	Function       string `json:"function,omitempty"`
-	TargetSelector string `json:"targetSelector,omitempty"`
-	EventSelector  string `json:"eventSelector,omitempty"`
-	TargetFilter   string `json:"targetFilter,omitempty"`
-	EventFilter    string `json:"eventFilter,omitempty"`
+	Function       string      `json:"function,omitempty"`
+	TargetSelector string      `json:"targetSelector,omitempty"`
+	EventSelector  string      `json:"eventSelector,omitempty"`
+	TargetFilter   string      `json:"targetFilter,omitempty"`
+	EventFilter    string      `json:"eventFilter,omitempty"`
+	RawData        interface{} `json:"rawData,omitempty"`
 }
 
 func (c *Client) ListProjectionDefinitions(ctx context.Context) ([]*ProjectionDefinition, error) {
