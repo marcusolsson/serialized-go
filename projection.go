@@ -133,3 +133,39 @@ func (c *Client) ListSingleProjections(ctx context.Context, name string) ([]*Pro
 
 	return response.Projections, err
 }
+
+// AggregatedProjection returns an aggregated projection for the given aggregate.
+func (c *Client) AggregatedProjection(ctx context.Context, name string) (*Projection, error) {
+	req, err := c.newRequest("GET", "/projections/aggregated/"+name, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var proj Projection
+
+	resp, err := c.do(ctx, req, &proj)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	return &proj, err
+}
+
+// ListAggregatedProjections lists all single projections.
+func (c *Client) ListAggregatedProjections(ctx context.Context) ([]*Projection, error) {
+	req, err := c.newRequest("GET", "/projections/aggregated", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var response struct {
+		Projections []*Projection `json:"projections"`
+	}
+
+	resp, err := c.do(ctx, req, &response)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	return response.Projections, err
+}

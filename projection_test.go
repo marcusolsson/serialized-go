@@ -192,3 +192,55 @@ func TestProjectionListSingle(t *testing.T) {
 		t.Fatalf("unexpected projection id: %s", projs[0].ID)
 	}
 }
+
+func TestProjectionGetAggregated(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, err := loadJSON("testdata/projection_get_agg_response.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		w.Write(b)
+	}))
+
+	c := NewClient(
+		WithBaseURL(ts.URL),
+	)
+
+	proj, err := c.AggregatedProjection(context.Background(), "foo")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if want := "string (uuid)"; want != proj.ID {
+		t.Fatalf("want = %s; got = %s", want, proj.ID)
+	}
+	if want := []byte(`{"field":"data"}`); !bytes.Equal(want, proj.Data) {
+		t.Fatalf("want = %s; got = %s", want, string(proj.Data))
+	}
+}
+
+func TestProjectionListAggregated(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, err := loadJSON("testdata/projection_list_agg_response.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		w.Write(b)
+	}))
+
+	c := NewClient(
+		WithBaseURL(ts.URL),
+	)
+
+	projs, err := c.ListAggregatedProjections(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(projs) != 1 {
+		t.Fatalf("unexpected number of definitions = %d; want = %d", len(projs), 1)
+	}
+	if projs[0].ID != "string (uuid)" {
+		t.Fatalf("unexpected projection id: %s", projs[0].ID)
+	}
+}
