@@ -8,27 +8,27 @@ import (
 )
 
 type Projection struct {
-	ID   string          `json:"projectionId"`
-	Data json.RawMessage `json:"data"`
+	ID   string          `json:"projectionId,omitempty"`
+	Data json.RawMessage `json:"data,omitempty"`
 }
 
 type ProjectionDefinition struct {
-	Name     string          `json:"projectionName"`
-	Feed     string          `json:"feedName"`
-	Handlers []*EventHandler `json:"handlers"`
+	Name     string          `json:"projectionName,omitempty"`
+	Feed     string          `json:"feedName,omitempty"`
+	Handlers []*EventHandler `json:"handlers,omitempty"`
 }
 
 type EventHandler struct {
-	EventType string      `json:"eventType"`
-	Functions []*Function `json:"functions"`
+	EventType string      `json:"eventType,omitempty"`
+	Functions []*Function `json:"functions,omitempty"`
 }
 
 type Function struct {
-	Function       string `json:"function"`
-	TargetSelector string `json:"targetSelector"`
-	EventSelector  string `json:"eventSelector"`
-	TargetFilter   string `json:"targetFilter"`
-	EventFilter    string `json:"eventFilter"`
+	Function       string `json:"function,omitempty"`
+	TargetSelector string `json:"targetSelector,omitempty"`
+	EventSelector  string `json:"eventSelector,omitempty"`
+	TargetFilter   string `json:"targetFilter,omitempty"`
+	EventFilter    string `json:"eventFilter,omitempty"`
 }
 
 func (c *Client) ListProjectionDefinitions(ctx context.Context) ([]*ProjectionDefinition, error) {
