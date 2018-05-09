@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-// Reaction holds a Serialized.io Reaction.
-type Reaction struct {
+// ReactionDefinition holds a Serialized.io Reaction.
+type ReactionDefinition struct {
 	Name               string   `json:"reactionName,omitempty"`
 	Feed               string   `json:"feedName,omitempty"`
 	ReactOnEventType   string   `json:"reactOnEventType,omitempty"`
@@ -33,8 +33,8 @@ type Action struct {
 	Body       string     `json:"body,omitempty"`
 }
 
-// CreateReaction registers a new reaction.
-func (c *Client) CreateReaction(ctx context.Context, r *Reaction) error {
+// CreateReactionDefinition registers a new reaction definition.
+func (c *Client) CreateReactionDefinition(ctx context.Context, r *ReactionDefinition) error {
 	req, err := c.newRequest("POST", "/reactions", r)
 	if err != nil {
 		return err
@@ -48,15 +48,15 @@ func (c *Client) CreateReaction(ctx context.Context, r *Reaction) error {
 	return err
 }
 
-// ListReactions returns all registered reactions.
-func (c *Client) ListReactions(ctx context.Context) ([]*Reaction, error) {
+// ListReactionDefinitions returns all registered reactions.
+func (c *Client) ListReactionDefinitions(ctx context.Context) ([]*ReactionDefinition, error) {
 	req, err := c.newRequest("GET", "/reactions", nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var response struct {
-		Definitions []*Reaction `json:"definitions"`
+		Definitions []*ReactionDefinition `json:"definitions"`
 	}
 
 	resp, err := c.do(ctx, req, &response)
@@ -86,14 +86,14 @@ func (c *Client) DeleteReaction(ctx context.Context, id string) error {
 	return nil
 }
 
-// Reaction returns a reaction with a given ID.
-func (c *Client) Reaction(ctx context.Context, id string) (*Reaction, error) {
+// ReactionDefinition returns a reaction definition with a given ID.
+func (c *Client) ReactionDefinition(ctx context.Context, id string) (*ReactionDefinition, error) {
 	req, err := c.newRequest("DELETE", "/reactions/"+id, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	r := new(Reaction)
+	r := new(ReactionDefinition)
 	resp, err := c.do(ctx, req, &r)
 	if err != nil {
 		return nil, err

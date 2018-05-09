@@ -22,7 +22,7 @@ func TestListReactions(t *testing.T) {
 		WithBaseURL(ts.URL),
 	)
 
-	r, err := c.ListReactions(context.Background())
+	r, err := c.ListReactionDefinitions(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func TestCreateReaction(t *testing.T) {
 		WithBaseURL(ts.URL),
 	)
 
-	r := &Reaction{
+	r := &ReactionDefinition{
 		Name:               "payment-processed-email-reaction",
 		Feed:               "payment",
 		ReactOnEventType:   "PaymentProcessed",
@@ -63,7 +63,7 @@ func TestCreateReaction(t *testing.T) {
 		},
 	}
 
-	if err := c.CreateReaction(context.Background(), r); err != nil {
+	if err := c.CreateReactionDefinition(context.Background(), r); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -94,7 +94,7 @@ func TestGetReaction(t *testing.T) {
 		WithBaseURL(ts.URL),
 	)
 
-	want := &Reaction{
+	want := &ReactionDefinition{
 		Name:               "payment-processed-email-reaction",
 		Feed:               "payment",
 		ReactOnEventType:   "PaymentProcessed",
@@ -106,7 +106,7 @@ func TestGetReaction(t *testing.T) {
 		},
 	}
 
-	got, err := c.Reaction(context.Background(), want.Name)
+	got, err := c.ReactionDefinition(context.Background(), want.Name)
 	if err != nil {
 		t.Fatal(err)
 	}
