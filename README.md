@@ -14,7 +14,7 @@ go get github.com/marcusolsson/serialized-go
 
 ## Usage
 
-```
+```go
 package main
 
 import (
