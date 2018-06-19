@@ -1,5 +1,14 @@
 # Terraform Provider for Serialized.IO
 
+## Authenticating
+
+```hcl
+provider "serialized" {
+  access_key        = "..." # Can also be sourced from SERIALIZED_ACCESS_KEY.
+  secret_access_key = "..." # Can also be sourced from SERIALIZED_SECRET_ACCESS_KEY.
+}
+```
+
 ## serialized_projection
 
 Creates a projection for Serialized.IO. For more information see
