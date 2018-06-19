@@ -23,15 +23,23 @@ type FeedEntry struct {
 	Events         []*Event
 }
 
+// FeedInfo holds additional information on a feed.
+type FeedInfo struct {
+	AggregateType  string `json:"aggregateType"`
+	AggregateCount int    `json:"aggregateCount"`
+	BatchCount     int    `json:"batchCount"`
+	EventCount     int    `json:"eventCount"`
+}
+
 // Feeds returns all feed types.
-func (c *Client) Feeds(ctx context.Context) ([]string, error) {
-	req, err := c.newRequest("GET", "/feeds/", nil)
+func (c *Client) Feeds(ctx context.Context) ([]FeedInfo, error) {
+	req, err := c.newRequest("GET", "/feeds", nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var response struct {
-		Feeds []string `json:"feeds"`
+		Feeds []FeedInfo `json:"feeds"`
 	}
 
 	resp, err := c.do(ctx, req, &response)

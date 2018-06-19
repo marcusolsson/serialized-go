@@ -44,7 +44,7 @@ func TestCreateReaction(t *testing.T) {
 		}
 		assertEqualJSON(t, got, want)
 
-		w.WriteHeader(http.StatusCreated)
+		w.WriteHeader(http.StatusOK)
 	}))
 
 	c := NewClient(
@@ -76,7 +76,7 @@ func TestDeleteReaction(t *testing.T) {
 		WithBaseURL(ts.URL),
 	)
 
-	if err := c.DeleteReaction(context.Background(), "payment-processed-email-reaction"); err != nil {
+	if err := c.DeleteReactionDefinition(context.Background(), "payment-processed-email-reaction"); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -35,13 +35,13 @@ type Action struct {
 
 // CreateReactionDefinition registers a new reaction definition.
 func (c *Client) CreateReactionDefinition(ctx context.Context, r *ReactionDefinition) error {
-	req, err := c.newRequest("POST", "/reactions", r)
+	req, err := c.newRequest("POST", "/reactions/definitions", r)
 	if err != nil {
 		return err
 	}
 
 	resp, err := c.do(ctx, req, nil)
-	if resp.StatusCode != http.StatusCreated {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
@@ -50,7 +50,7 @@ func (c *Client) CreateReactionDefinition(ctx context.Context, r *ReactionDefini
 
 // ListReactionDefinitions returns all registered reactions.
 func (c *Client) ListReactionDefinitions(ctx context.Context) ([]*ReactionDefinition, error) {
-	req, err := c.newRequest("GET", "/reactions", nil)
+	req, err := c.newRequest("GET", "/reactions/definitions", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -67,9 +67,9 @@ func (c *Client) ListReactionDefinitions(ctx context.Context) ([]*ReactionDefini
 	return response.Definitions, err
 }
 
-// DeleteReaction deletes a reaction with a given ID.
-func (c *Client) DeleteReaction(ctx context.Context, id string) error {
-	req, err := c.newRequest("DELETE", "/reactions/"+id, nil)
+// DeleteReactionDefinition deletes a reaction with a given name.
+func (c *Client) DeleteReactionDefinition(ctx context.Context, name string) error {
+	req, err := c.newRequest("DELETE", "/reactions/definitions/"+name, nil)
 	if err != nil {
 		return err
 	}
@@ -86,9 +86,9 @@ func (c *Client) DeleteReaction(ctx context.Context, id string) error {
 	return nil
 }
 
-// ReactionDefinition returns a reaction definition with a given ID.
-func (c *Client) ReactionDefinition(ctx context.Context, id string) (*ReactionDefinition, error) {
-	req, err := c.newRequest("DELETE", "/reactions/"+id, nil)
+// ReactionDefinition returns a reaction definition with a given name.
+func (c *Client) ReactionDefinition(ctx context.Context, name string) (*ReactionDefinition, error) {
+	req, err := c.newRequest("GET", "/reactions/definitions/"+name, nil)
 	if err != nil {
 		return nil, err
 	}

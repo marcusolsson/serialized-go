@@ -1,5 +1,10 @@
 {
     "feeds": [
-        "payment"
+        {
+            "aggregateType": "payment",
+            "aggregateCount": 1337,
+            "batchCount": 7331,
+            "eventCount": 9977
+        }
     ]
 }
