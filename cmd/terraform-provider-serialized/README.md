@@ -9,14 +9,16 @@ provider "serialized" {
 }
 ```
 
-## serialized_projection
+## Resources
+
+### serialized_projection
 
 Creates a projection for Serialized.IO. For more information see
 [the official documentation](https://serialized.io/docs/apis/event-projection/) and
 [API](https://serialized.io/api/#tag-Event-Projection-API).
 
 
-### Example Usage
+#### Example Usage
 
 ```hcl
 resource "serialized_projection" "default" {
@@ -41,7 +43,7 @@ resource "serialized_projection" "default" {
 }
 ```
 
-### Argument Reference
+#### Argument Reference
 
 The following arguments are supported:
 
@@ -52,14 +54,14 @@ The following arguments are supported:
 
 * `handlers` - (Required) The event handlers.
 
-## serialized_reaction
+### serialized_reaction
 
 Creates a reaction for Serialized.IO. For more information see
 [the official documentation](https://serialized.io/docs/apis/event-reaction/) and
 [API](https://serialized.io/api/#tag-Event-Reaction-API).
 
 
-### Example Usage
+#### Example Usage
 
 ```hcl
 resource "serialized_reaction" "default" {
@@ -80,7 +82,7 @@ resource "serialized_reaction" "default" {
 }
 ```
 
-### Argument Reference
+#### Argument Reference
 
 The following arguments are supported:
 
