@@ -1,47 +1,70 @@
 package main
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
-	"fmt"
 	"os"
-	"strings"
-	"text/tabwriter"
-	"time"
 
 	"github.com/alecthomas/kingpin"
 	serialized "github.com/marcusolsson/serialized-go"
-	uuid "github.com/satori/go.uuid"
 )
 
 func main() {
 	var (
 		app = kingpin.New("serialized-cli", "Interact with the Serialized.io API from the command-line.").Version("0.1.0")
 
-		store                = app.Command("store", "Store a new event.")
-		storeAggType         = store.Flag("agg-type", "Type of aggregate.").Required().String()
-		storeAggID           = store.Flag("agg-id", "ID of aggregate.").String()
-		storeEventType       = store.Flag("event-type", "Type of event.").Required().String()
-		storeEventID         = store.Flag("event-id", "ID of event.").String()
-		storeData            = store.Flag("data", "Event data.").Short('d').Required().String()
-		storeExpectedVersion = store.Flag("expected-version", "Version number for optimistic concurrency control.").Int64()
+		events = app.Command("events", "Event commands.")
 
-		aggregate      = app.Command("aggregate", "Display an aggregate.")
-		aggregateID    = aggregate.Arg("id", "ID of aggregate.").Required().String()
-		aggregateType  = aggregate.Flag("type", "Type of aggregate.").Short('t').Required().String()
-		aggregateLimit = aggregate.Flag("limit", "Max number of events to show in preview.").Short('l').Default("10").Int()
+		eventsStore                = events.Command("store", "Store a new event.")
+		eventsStoreAggType         = eventsStore.Flag("agg-type", "Type of aggregate.").Short('a').Required().String()
+		eventsStoreAggID           = eventsStore.Flag("agg-id", "ID of aggregate.").String()
+		eventsStoreEventType       = eventsStore.Flag("event-type", "Type of event.").Short('e').Required().String()
+		eventsStoreEventID         = eventsStore.Flag("event-id", "ID of event.").String()
+		eventsStoreData            = eventsStore.Flag("data", "Event data.").Short('d').Required().String()
+		eventsStoreExpectedVersion = eventsStore.Flag("expected-version", "Version number for optimistic concurrency control.").Int64()
 
-		projection      = app.Command("projection", "Display a projection.")
-		projectionName  = projection.Arg("name", "Name of the projection.").Required().String()
-		projectionAggID = projection.Flag("agg-id", "ID of aggregate.").Required().String()
+		aggregates = app.Command("aggregates", "Aggregate commands.")
 
-		feed        = app.Command("feed", "Display the feed.")
-		feedName    = feed.Arg("name", "Name of feed.").Required().String()
-		feedSince   = feed.Flag("since", "Sequence number to start from.").Short('s').Int64()
-		feedCurrent = feed.Flag("current", "Return current sequence number at head for a given feed.").Short('c').Bool()
+		aggregatesGet        = aggregates.Command("get", "Show aggregate")
+		aggregatesGetID      = aggregatesGet.Arg("id", "ID of aggregate.").Required().String()
+		aggregatesGetType    = aggregatesGet.Flag("type", "Type of aggregate.").Short('t').Required().String()
+		aggregatesGetLimit   = aggregatesGet.Flag("limit", "Max number of events to show in preview.").Short('l').Default("10").Int()
+		aggregatesDelete     = aggregates.Command("delete", "Delete aggregates of a given type")
+		aggregatesDeleteType = aggregatesDelete.Flag("type", "Type of aggregate.").Short('t').Required().String()
 
-		feeds = app.Command("feeds", "List all existing feeds.")
+		feeds = app.Command("feeds", "Feed commands.")
+
+		feedsGet        = feeds.Command("get", "Show feed.")
+		feedsGetName    = feedsGet.Arg("name", "Name of feed.").Required().String()
+		feedsGetSince   = feedsGet.Flag("since", "Sequence number to start from.").Short('s').Int64()
+		feedsGetCurrent = feedsGet.Flag("current", "Return current sequence number at head for a given feed.").Short('c').Bool()
+		feedsList       = feeds.Command("list", "List all existing feeds.")
+
+		projections = app.Command("projections", "Projection commands.")
+
+		projectionsSingle               = projections.Command("single", "Single projection commands.")
+		projectionsSingleGet            = projectionsSingle.Command("get", "Show projection.")
+		projectionsSingleGetName        = projectionsSingleGet.Arg("name", "Name of the projection.").Required().String()
+		projectionsSingleGetAggregateID = projectionsSingleGet.Flag("agg-id", "ID of aggregate.").Required().String()
+
+		projectionsAggregated        = projections.Command("aggregated", "Aggregated projection commands.")
+		projectionsAggregatedGet     = projectionsAggregated.Command("get", "Show aggregated projection.")
+		projectionsAggregatedGetName = projectionsAggregatedGet.Arg("name", "Name of the aggregated projection.").Required().String()
+		projectionsAggregatedList    = projectionsAggregated.Command("list", "List aggregated projections.")
+
+		projectionsDefinitions           = projections.Command("definitions", "Projection definitions commands.")
+		projectionsDefinitionsGet        = projectionsDefinitions.Command("get", "Show projection definition.")
+		projectionsDefinitionsGetName    = projectionsDefinitionsGet.Arg("name", "Name of the projection definition.").Required().String()
+		projectionsDefinitionsDelete     = projectionsDefinitions.Command("delete", "Delete a projection definition.")
+		projectionsDefinitionsDeleteName = projectionsDefinitionsDelete.Arg("name", "Name of the projection definition.").Required().String()
+		projectionsDefinitionsList       = projectionsDefinitions.Command("list", "List projection definitions.")
+
+		reactions = app.Command("reactions", "Reaction commands.")
+
+		reactionsDefinitions           = reactions.Command("definitions", "Reaction commands.")
+		reactionsDefinitionsGet        = reactionsDefinitions.Command("get", "Show reaction definition.")
+		reactionsDefinitionsGetName    = reactionsDefinitionsGet.Arg("name", "Name of the reaction definition").Required().String()
+		reactionsDefinitionsDelete     = reactionsDefinitions.Command("delete", "Delete a reaction definition.")
+		reactionsDefinitionsDeleteName = reactionsDefinitionsDelete.Arg("name", "Name of the reaction definition.").Required().String()
+		reactionsDefinitionsList       = reactionsDefinitions.Command("list", "List reaction definitions.")
 	)
 
 	var (
@@ -55,149 +78,70 @@ func main() {
 	)
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
-	case store.FullCommand():
+	// Events
+	case eventsStore.FullCommand():
 		kingpin.FatalIfError(
-			storeEvent(client, *storeAggType, *storeAggID, *storeEventType, *storeEventID, *storeData, *storeExpectedVersion),
+			eventsStoreHandler(client, *eventsStoreAggType, *eventsStoreAggID, *eventsStoreEventType, *eventsStoreEventID, *eventsStoreData, *eventsStoreExpectedVersion),
 			"unable to store event")
-	case aggregate.FullCommand():
+
+		// Aggregates
+	case aggregatesGet.FullCommand():
 		kingpin.FatalIfError(
-			showAggregate(client, *aggregateType, *aggregateID, *aggregateLimit),
+			aggregatesGetHandler(client, *aggregatesGetType, *aggregatesGetID, *aggregatesGetLimit),
 			"unable to get aggregate")
-	case projection.FullCommand():
+	case aggregatesDelete.FullCommand():
 		kingpin.FatalIfError(
-			showProjection(client, *projectionName, *projectionAggID),
-			"unable to get projection")
-	case feed.FullCommand():
+			aggregatesDeleteHandler(client, *aggregatesDeleteType),
+			"unable to delete aggregate")
+
+		// Projections
+	case projectionsSingleGet.FullCommand():
 		kingpin.FatalIfError(
-			showFeed(client, *feedName, *feedSince, *feedCurrent),
+			projectionsSingleGetHandler(client, *projectionsSingleGetName, *projectionsSingleGetAggregateID),
+			"unable to get single projection")
+	case projectionsAggregatedGet.FullCommand():
+		kingpin.FatalIfError(
+			projectionsAggregatedGetHandler(client, *projectionsAggregatedGetName),
+			"unable to get aggregated projection")
+	case projectionsAggregatedList.FullCommand():
+		kingpin.FatalIfError(
+			projectionsAggregatedListHandler(client),
+			"unable to list aggregated projections")
+	case projectionsDefinitionsGet.FullCommand():
+		kingpin.FatalIfError(
+			projectionsDefinitionsGetHandler(client, *projectionsDefinitionsGetName),
+			"unable to get projection definition")
+	case projectionsDefinitionsDelete.FullCommand():
+		kingpin.FatalIfError(
+			projectionsDefinitionsDeleteHandler(client, *projectionsDefinitionsDeleteName),
+			"unable to delete projection definition")
+	case projectionsDefinitionsList.FullCommand():
+		kingpin.FatalIfError(
+			projectionsDefinitionsListHandler(client),
+			"unable to list projection definitions")
+
+		// Feeds
+	case feedsGet.FullCommand():
+		kingpin.FatalIfError(
+			feedsGetHandler(client, *feedsGetName, *feedsGetSince, *feedsGetCurrent),
 			"unable to get feed")
-	case feeds.FullCommand():
+	case feedsList.FullCommand():
 		kingpin.FatalIfError(
-			listFeeds(client),
+			feedsListHandler(client),
 			"unable to list feeds")
+
+		// Reactions
+	case reactionsDefinitionsGet.FullCommand():
+		kingpin.FatalIfError(
+			reactionsDefinitionsGetHandler(client, *reactionsDefinitionsGetName),
+			"unable to get reaction definition")
+	case reactionsDefinitionsDelete.FullCommand():
+		kingpin.FatalIfError(
+			reactionsDefinitionsDeleteHandler(client, *reactionsDefinitionsDeleteName),
+			"unable to delete reaction definition")
+	case reactionsDefinitionsList.FullCommand():
+		kingpin.FatalIfError(
+			reactionsDefinitionsListHandler(client),
+			"unable to list reaction definitions")
 	}
-}
-
-func storeEvent(c *serialized.Client, aggType, aggID, eventType, eventID, data string, version int64) error {
-	if eventID == "" {
-		id, err := uuid.NewV4()
-		if err != nil {
-			return err
-
-		}
-		eventID = id.String()
-	}
-
-	if aggID == "" {
-		id, err := uuid.NewV4()
-		if err != nil {
-			return err
-		}
-		aggID = id.String()
-	}
-
-	event := &serialized.Event{
-		Type: eventType,
-		ID:   eventID,
-		Data: []byte(data),
-	}
-
-	return c.Store(context.Background(), aggType, aggID, version, event)
-}
-
-func showAggregate(c *serialized.Client, aggType, aggID string, limit int) error {
-	agg, err := c.LoadAggregate(context.Background(), aggType, aggID)
-	if err != nil {
-		return err
-	}
-
-	w := tabwriter.NewWriter(os.Stdout, 5, 4, 1, ' ', 0)
-	fmt.Fprintln(w, "Type:", "\t", agg.Type)
-	fmt.Fprintln(w, "ID:", "\t", agg.ID)
-	fmt.Fprintln(w, "Version:", "\t", agg.Version)
-	fmt.Fprintln(w)
-	fmt.Fprintf(w, "Showing the %d most recent events:\n", limit)
-	fmt.Fprintln(w)
-
-	w.Flush()
-
-	fmt.Fprintln(w, "EVENT ID", "\t", "TYPE", "\t", "DATA")
-
-	events := agg.Events
-	if len(events) > limit {
-		events = events[len(events)-limit:]
-	}
-	for _, e := range events {
-		var buf bytes.Buffer
-		if err := json.Compact(&buf, e.Data); err != nil {
-			return err
-		}
-		fmt.Fprintln(w, e.ID, "\t", e.Type, "\t", buf.String())
-	}
-	w.Flush()
-
-	return nil
-}
-
-func showProjection(c *serialized.Client, projName, aggID string) error {
-	proj, err := c.SingleProjection(context.Background(), projName, aggID)
-	if err != nil {
-		return err
-	}
-
-	var buf bytes.Buffer
-	if err := json.Indent(&buf, proj.Data, "", "  "); err != nil {
-		return err
-	}
-
-	fmt.Println(buf.String())
-
-	return nil
-}
-
-func showFeed(c *serialized.Client, feed string, since int64, showCurrent bool) error {
-	ctx := context.Background()
-
-	if showCurrent {
-		seq, err := c.FeedSequenceNumber(ctx, feed)
-		if err != nil {
-			return fmt.Errorf("unable to get sequence number: %s", err)
-		}
-
-		fmt.Println(seq)
-
-		return nil
-	}
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, '\t', 0)
-
-	fmt.Fprintln(w, strings.Join([]string{"TIMESTAMP", "AGGREGATE ID", "EVENT TYPE"}, "\t"))
-
-	return c.Feed(ctx, feed, since, func(e *serialized.FeedEntry) {
-		ts := time.Unix(e.Timestamp/1000, 0)
-
-		for _, ev := range e.Events {
-			var buf bytes.Buffer
-			if err := json.Compact(&buf, ev.Data); err != nil {
-				kingpin.Fatalf("unable to format event data: %s", err)
-			}
-
-			fmt.Fprintln(w, strings.Join([]string{ts.Format(time.RFC1123Z), e.AggregateID, ev.Type}, "\t"))
-
-			w.Flush()
-		}
-	})
-}
-
-func listFeeds(c *serialized.Client) error {
-	feeds, err := c.Feeds(context.Background())
-	if err != nil {
-		return err
-	}
-
-	for _, f := range feeds {
-		fmt.Println(f)
-	}
-
-	return nil
 }
