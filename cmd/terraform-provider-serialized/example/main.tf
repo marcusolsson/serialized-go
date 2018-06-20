@@ -19,8 +19,6 @@ resource "serialized_projection" "example" {
           function        = "inc"
           target_selector = "$.projection.orders[?]"
           event_selector  = "$.event[?]"
-          target_filter   = "@.orderId == $.event.orderId"
-          event_filter    = "@.orderAmount > 4000"
         },
       ]
     },
@@ -41,5 +39,7 @@ resource "serialized_reaction" "example" {
 
   action {
     action_type = "HTTP_POST"
+    target_uri  = "http://example.com/my-endpoint"
+    body        = "foo"
   }
 }
