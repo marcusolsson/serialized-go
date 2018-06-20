@@ -48,6 +48,53 @@ func (c *Client) Store(ctx context.Context, aggType, aggID string, version int64
 	return nil
 }
 
+// RequestDeleteAggregateByType requests a aggregate deletion. To delete the
+// aggregates, pass the token returned by this this method to
+// DeleteAggregateByType.
+func (c *Client) RequestDeleteAggregateByType(ctx context.Context, aggType string) (string, error) {
+	req, err := c.newRequest("DELETE", "/aggregates/"+aggType, nil)
+	if err != nil {
+		return "", err
+	}
+
+	var response struct {
+		DeleteToken string `json:"deleteToken"`
+	}
+
+	resp, err := c.do(ctx, req, &response)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	return response.DeleteToken, nil
+}
+
+// DeleteAggregateByType permanently deletes all aggregates of a given type.
+// It requires a token returned from RequestDeleteAggregateByType.
+func (c *Client) DeleteAggregateByType(ctx context.Context, aggType, token string) error {
+	path := fmt.Sprintf("/aggregates/%s?deleteToken=%s", aggType, token)
+
+	req, err := c.newRequest("DELETE", path, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.do(ctx, req, nil)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
 // AggregateExists returns whether a specific aggregate exists.
 func (c *Client) AggregateExists(ctx context.Context, aggType, aggID string) (bool, error) {
 	req, err := c.newRequest("HEAD", "/aggregates/"+aggType+"/"+aggID, nil)
