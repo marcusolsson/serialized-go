@@ -118,7 +118,7 @@ func TestProjectionGetDefinition(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("got = %s; want = %s", got, want)
+		t.Fatalf("got = %v; want = %v", got, want)
 	}
 }
 
