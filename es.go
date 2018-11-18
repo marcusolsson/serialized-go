@@ -108,7 +108,7 @@ func (c *Client) AggregateExists(ctx context.Context, aggType, aggID string) (bo
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		return false, ErrAggregateNotFound
+		return false, nil
 	}
 	if resp.StatusCode != http.StatusOK {
 		return false, fmt.Errorf("unexpected status code: %d", resp.StatusCode)

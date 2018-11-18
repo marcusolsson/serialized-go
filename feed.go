@@ -126,7 +126,7 @@ func (c *Client) FeedSequenceNumber(ctx context.Context, feedName string) (int64
 		return 0, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	seqstr := resp.Header.Get("Current-Sequence-Number")
+	seqstr := resp.Header.Get("Serialized-Sequencenumber-Current")
 	seq, err := strconv.ParseInt(seqstr, 10, 64)
 	if err != nil {
 		return 0, err
