@@ -34,10 +34,14 @@ func assertEqualJSON(t *testing.T, b1, b2 []byte) {
 
 	if !bytes.Equal(b1, b2) {
 		var buf1 bytes.Buffer
-		json.Indent(&buf1, b1, "", "\t")
+		if err := json.Indent(&buf1, b1, "", "\t"); err != nil {
+			t.Fatal(err)
+		}
 
 		var buf2 bytes.Buffer
-		json.Indent(&buf2, b2, "", "\t")
+		if err := json.Indent(&buf2, b2, "", "\t"); err != nil {
+			t.Fatal(err)
+		}
 
 		t.Errorf("unexpected request body =\n%s\n\nwant =\n%s", buf1.String(), buf2.String())
 	}

@@ -15,7 +15,9 @@ func TestFeedList(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		w.Write(b)
+		if _, err := w.Write(b); err != nil {
+			t.Fatal(err)
+		}
 	}))
 
 	c := NewClient(
@@ -50,7 +52,9 @@ func TestFeed(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		w.Write(b)
+		if _, err := w.Write(b); err != nil {
+			t.Fatal(err)
+		}
 	}))
 
 	c := NewClient(
@@ -73,7 +77,9 @@ func TestFeed(t *testing.T) {
 	event := entry.Events[0]
 
 	var pp testPaymentProcessed
-	json.Unmarshal(event.Data, &pp)
+	if err := json.Unmarshal(event.Data, &pp); err != nil {
+		t.Fatal(err)
+	}
 
 	if pp.Amount != 1000 {
 		t.Errorf("incorrect amount = %d; want = %d", pp.Amount, 1000)

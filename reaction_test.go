@@ -15,7 +15,9 @@ func TestListReactions(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		w.Write(b)
+		if _, err := w.Write(b); err != nil {
+			t.Fatal(err)
+		}
 	}))
 
 	c := NewClient(
@@ -87,7 +89,9 @@ func TestGetReaction(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		w.Write(b)
+		if _, err := w.Write(b); err != nil {
+			t.Fatal(err)
+		}
 	}))
 
 	c := NewClient(

@@ -16,7 +16,9 @@ func TestProjectionListDefinitions(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		w.Write(b)
+		if _, err := w.Write(b); err != nil {
+			t.Fatal(err)
+		}
 	}))
 
 	c := NewClient(
@@ -86,7 +88,9 @@ func TestProjectionGetDefinition(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		w.Write(b)
+		if _, err := w.Write(b); err != nil {
+			t.Fatal(err)
+		}
 	}))
 
 	c := NewClient(
@@ -147,7 +151,9 @@ func TestProjectionGetSingle(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		w.Write(b)
+		if _, err := w.Write(b); err != nil {
+			t.Fatal(err)
+		}
 	}))
 
 	c := NewClient(
@@ -173,7 +179,9 @@ func TestProjectionListSingle(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		w.Write(b)
+		if _, err := w.Write(b); err != nil {
+			t.Fatal(err)
+		}
 	}))
 
 	c := NewClient(
@@ -199,7 +207,9 @@ func TestProjectionGetAggregated(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		w.Write(b)
+		if _, err := w.Write(b); err != nil {
+			t.Fatal(err)
+		}
 	}))
 
 	c := NewClient(
@@ -225,7 +235,9 @@ func TestProjectionListAggregated(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		w.Write(b)
+		if _, err := w.Write(b); err != nil {
+			t.Fatal(err)
+		}
 	}))
 
 	c := NewClient(

@@ -28,7 +28,9 @@ func main() {
 				var orderPlaced struct {
 					CustomerID string `json:"customerId"`
 				}
-				json.Unmarshal(event.Data, &orderPlaced)
+				if err := json.Unmarshal(event.Data, &orderPlaced); err != nil {
+					fmt.Printf("Unable to unmarshal event data: %v", err)
+				}
 
 				fmt.Printf("An order with ID %s was placed by %s\n", entry.AggregateID, orderPlaced.CustomerID)
 			case "OrderPaidEvent":

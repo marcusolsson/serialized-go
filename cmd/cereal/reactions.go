@@ -33,8 +33,8 @@ func reactionsDefinitionsGetHandler(c *serialized.Client, name string) error {
 	level++
 
 	fmt.Fprintf(w, kv("Type", string(def.Action.ActionType), level))
-	fmt.Fprintf(w, kv("Target URI", string(def.Action.TargetURI), level))
-	fmt.Fprintf(w, kv("Body", string(def.Action.Body), level))
+	fmt.Fprintf(w, kv("Target URI", def.Action.TargetURI, level))
+	fmt.Fprintf(w, kv("Body", def.Action.Body, level))
 
 	w.Flush()
 
