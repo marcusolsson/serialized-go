@@ -17,9 +17,9 @@ type OrderState struct {
 	TrackingNumber TrackingNumber
 }
 
-func buildState(orderID OrderID, version int64, events []*serialized.Event) OrderState {
+func buildState(id OrderID, version int64, events []*serialized.Event) OrderState {
 	state := OrderState{
-		ID:      orderID,
+		ID:      id,
 		Version: version,
 	}
 

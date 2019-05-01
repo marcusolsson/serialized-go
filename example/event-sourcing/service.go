@@ -13,7 +13,7 @@ type SerializedEventService struct {
 	client *serialized.Client
 }
 
-func (s *SerializedEventService) SaveEvents(ctx context.Context, orderID OrderID, version int64, events ...OrderEvent) error {
+func (s *SerializedEventService) SaveEvents(ctx context.Context, id OrderID, version int64, events ...OrderEvent) error {
 	var res []*serialized.Event
 	for _, ev := range events {
 		b, err := json.Marshal(ev)
@@ -27,11 +27,11 @@ func (s *SerializedEventService) SaveEvents(ctx context.Context, orderID OrderID
 			Data: json.RawMessage(b),
 		})
 	}
-	return s.client.Store(ctx, "order", string(orderID), version, res...)
+	return s.client.Store(ctx, "order", string(id), version, res...)
 }
 
-func (s *SerializedEventService) Load(ctx context.Context, orderID OrderID) (OrderState, error) {
-	agg, err := s.client.LoadAggregate(ctx, "order", string(orderID))
+func (s *SerializedEventService) Load(ctx context.Context, id OrderID) (OrderState, error) {
+	agg, err := s.client.LoadAggregate(ctx, "order", string(id))
 	if err != nil {
 		return OrderState{}, err
 	}

@@ -73,13 +73,13 @@ func (o *Order) Pay(amount Amount) ([]OrderEvent, error) {
 	return events, nil
 }
 
-func (o *Order) Ship(trackingNumber TrackingNumber) (OrderShippedEvent, error) {
+func (o *Order) Ship(number TrackingNumber) (OrderShippedEvent, error) {
 	if o.Status != OrderStatusPaid {
 		return OrderShippedEvent{}, errors.New("order not paid")
 	}
 	return OrderShippedEvent{
 		CustomerID:     o.CustomerID,
-		TrackingNumber: trackingNumber,
+		TrackingNumber: number,
 	}, nil
 }
 
