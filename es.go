@@ -13,7 +13,7 @@ var ErrAggregateNotFound = errors.New("aggregate not found")
 // Aggregate holds a Serialized.io Aggregate.
 type Aggregate struct {
 	ID      string   `json:"aggregateId"`
-	Version int      `json:"aggregateVersion"`
+	Version int64    `json:"aggregateVersion"`
 	Type    string   `json:"aggregateType"`
 	Events  []*Event `json:"events"`
 }

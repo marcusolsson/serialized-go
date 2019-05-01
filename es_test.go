@@ -90,7 +90,7 @@ func TestLoadAggregate(t *testing.T) {
 	var (
 		aggType    = "payment"
 		aggID      = "22c3780f-6dcb-440f-8532-6693be83f21c"
-		aggVersion = 1
+		aggVersion = int64(1)
 	)
 
 	agg, err := c.LoadAggregate(context.Background(), aggType, aggID)
