@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 
@@ -21,24 +20,32 @@ func main() {
 		serialized.WithSecretAccessKey(secretAccessKey),
 	)
 
-	err := client.Feed(context.Background(), "order", 0, func(entry *serialized.FeedEntry) {
+	ctx := context.Background()
+
+	err := client.Feed(ctx, "order", 0, func(entry *serialized.FeedEntry) {
+		log.Printf("Processing entry with sequenceNumber: %d", entry.SequenceNumber)
+
 		for _, event := range entry.Events {
+			var data map[string]interface{}
+			if err := json.Unmarshal(event.Data, &data); err != nil {
+				log.Printf("Unable to unmarshal event data: %v", err)
+			}
+
 			switch event.Type {
 			case "OrderPlacedEvent":
-				var orderPlaced struct {
-					CustomerID string `json:"customerId"`
-				}
-				if err := json.Unmarshal(event.Data, &orderPlaced); err != nil {
-					fmt.Printf("Unable to unmarshal event data: %v", err)
-				}
-
-				fmt.Printf("An order with ID %s was placed by %s\n", entry.AggregateID, orderPlaced.CustomerID)
+				log.Printf("An order with ID [%s] was placed by customer [%v]\n", entry.AggregateID, data["customerId"])
 			case "OrderPaidEvent":
-				fmt.Printf("The order with ID %s was paid\n", entry.AggregateID)
+				log.Printf("The order with ID [%s] was paid, amountPaid: %v, amountLeft: %v\n", entry.AggregateID, data["amountPaid"], data["amountLeft"])
+			case "OrderShippedEvent":
+				log.Printf("The order with ID [%s] was shipped, trackingNumber: %v\n", entry.AggregateID, data["trackingNumber"])
 			case "OrderCancelledEvent":
-				fmt.Printf("The order with ID %s was cancelled\n", entry.AggregateID)
+				log.Printf("The order with ID [%s] was cancelled, reason: %v\n", entry.AggregateID, data["reason"])
+			case "PaymentReceivedEvent":
+				log.Printf("The order with ID [%s] received payment: %v\n", entry.AggregateID, data["amountPaid"])
+			case "OrderFullyPaid":
+				log.Printf("The order with ID [%s] is fully paid\n", entry.AggregateID)
 			default:
-				fmt.Println("Don't know how to handle events of type:", event.Type)
+				log.Printf("Don't know how to handle events of type: %s", event.Type)
 			}
 		}
 	})
