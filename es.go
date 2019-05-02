@@ -7,10 +7,10 @@ import (
 	"net/http"
 )
 
-// ErrAggregateNotFound is returned when no events exist for a given aggregate ID.
+// ErrAggregateNotFound is returned when no events exist for an aggregate ID.
 var ErrAggregateNotFound = errors.New("aggregate not found")
 
-// Aggregate holds a Serialized.io Aggregate.
+// Aggregate represents a Serialized.io Aggregate.
 type Aggregate struct {
 	ID      string   `json:"aggregateId"`
 	Version int64    `json:"aggregateVersion"`
@@ -18,8 +18,8 @@ type Aggregate struct {
 	Events  []*Event `json:"events"`
 }
 
-// Store saves events for a given aggregate. All events must refer to
-// the same aggregate id.
+// Store saves events for a given aggregate. All events must refer to the same
+// aggregate id.
 func (c *Client) Store(ctx context.Context, aggType, aggID string, version int64, events ...*Event) error {
 	reqBody := struct {
 		AggregateID     string   `json:"aggregateId"`
@@ -95,7 +95,7 @@ func (c *Client) DeleteAggregateByType(ctx context.Context, aggType, token strin
 	return nil
 }
 
-// AggregateExists returns whether a specific aggregate exists.
+// AggregateExists reports whether a specific aggregate exists.
 func (c *Client) AggregateExists(ctx context.Context, aggType, aggID string) (bool, error) {
 	req, err := c.newRequest("HEAD", "/aggregates/"+aggType+"/"+aggID, nil)
 	if err != nil {
@@ -117,7 +117,7 @@ func (c *Client) AggregateExists(ctx context.Context, aggType, aggID string) (bo
 	return true, nil
 }
 
-// LoadAggregate loads all events for a single aggregate.
+// LoadAggregate returns all events for a single aggregate.
 func (c *Client) LoadAggregate(ctx context.Context, aggType, aggID string) (*Aggregate, error) {
 	req, err := c.newRequest("GET", "/aggregates/"+aggType+"/"+aggID, nil)
 	if err != nil {

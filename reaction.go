@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// ReactionDefinition holds a Serialized.io Reaction.
+// ReactionDefinition defines a Serialized.io Reaction.
 type ReactionDefinition struct {
 	Name               string   `json:"reactionName,omitempty"`
 	Feed               string   `json:"feedName,omitempty"`
@@ -17,16 +17,17 @@ type ReactionDefinition struct {
 	Action             *Action  `json:"action,omitempty"`
 }
 
-// ActionType represents a reaction action.
+// ActionType represents the type of action used to integrate with external
+// systems.
 type ActionType string
 
-// Available action types.
+// Valid action types.
 const (
 	ActionTypeHTTPPost  ActionType = "HTTP_POST"
 	ActionTypeSlackPost ActionType = "SLACK_POST"
 )
 
-// Action defines a react action.
+// An Action defines what will happen when the reaction is triggered.
 type Action struct {
 	ActionType ActionType `json:"actionType,omitempty"`
 	TargetURI  string     `json:"targetUri,omitempty"`

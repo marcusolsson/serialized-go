@@ -9,13 +9,13 @@ import (
 	"time"
 )
 
-// Feed holds a Serialized.io feed.
+// Feed represents a Serialized.io feed.
 type Feed struct {
 	Entries []*FeedEntry `json:"entries"`
 	HasMore bool         `json:"hasMore"`
 }
 
-// FeedEntry holds a Serialized.io feed entry.
+// FeedEntry represents an entry in a feed.
 type FeedEntry struct {
 	SequenceNumber int64
 	AggregateID    string
@@ -23,7 +23,7 @@ type FeedEntry struct {
 	Events         []*Event
 }
 
-// FeedInfo holds additional information on a feed.
+// FeedInfo holds additional information for a feed.
 type FeedInfo struct {
 	AggregateType  string `json:"aggregateType"`
 	AggregateCount int    `json:"aggregateCount"`
@@ -110,7 +110,8 @@ func (c *Client) feed(ctx context.Context, name string, since int64) (*Feed, err
 	return f, nil
 }
 
-// FeedSequenceNumber returns current sequence number at head for a given feed.
+// FeedSequenceNumber returns the current sequence number at head for a given
+// feed.
 func (c *Client) FeedSequenceNumber(ctx context.Context, feedName string) (int64, error) {
 	req, err := c.newRequest("HEAD", "/feeds/"+feedName, nil)
 	if err != nil {

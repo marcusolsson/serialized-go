@@ -23,7 +23,7 @@ type Client struct {
 	httpClient *http.Client
 }
 
-// NewClient return a new Serialized.io Client.
+// NewClient returns a new Serialized.io Client.
 func NewClient(opts ...func(*Client)) *Client {
 	c := &Client{
 		baseURL: &url.URL{

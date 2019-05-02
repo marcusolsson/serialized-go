@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-// Projection represents a model used to present your event data.
+// Projection represents the model used to present your event data.
 type Projection struct {
 	ID   string          `json:"projectionId,omitempty"`
 	Data json.RawMessage `json:"data,omitempty"`
@@ -36,7 +36,7 @@ type Function struct {
 	RawData        interface{} `json:"rawData,omitempty"`
 }
 
-// ListProjectionDefinitions lists all definitions.
+// ListProjectionDefinitions returns all definitions.
 func (c *Client) ListProjectionDefinitions(ctx context.Context) ([]*ProjectionDefinition, error) {
 	req, err := c.newRequest("GET", "/projections/definitions", nil)
 	if err != nil {
@@ -119,7 +119,7 @@ func (c *Client) SingleProjection(ctx context.Context, projName, aggID string) (
 	return &proj, err
 }
 
-// ListSingleProjections lists all single projections.
+// ListSingleProjections returns all single projections.
 func (c *Client) ListSingleProjections(ctx context.Context, name string) ([]*Projection, error) {
 	req, err := c.newRequest("GET", "/projections/single/"+name, nil)
 	if err != nil {
@@ -155,7 +155,7 @@ func (c *Client) AggregatedProjection(ctx context.Context, name string) (*Projec
 	return &proj, err
 }
 
-// ListAggregatedProjections lists all single projections.
+// ListAggregatedProjections returns all single projections.
 func (c *Client) ListAggregatedProjections(ctx context.Context) ([]*Projection, error) {
 	req, err := c.newRequest("GET", "/projections/aggregated", nil)
 	if err != nil {

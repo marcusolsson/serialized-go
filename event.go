@@ -2,7 +2,7 @@ package serialized
 
 import "encoding/json"
 
-// Event holds a Serialized.io event.
+// Event represents a Serialized.io event.
 type Event struct {
 	ID            string          `json:"eventId"`
 	Type          string          `json:"eventType"`
